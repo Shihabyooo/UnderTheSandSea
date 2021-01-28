@@ -86,6 +86,96 @@ public class Grid : MonoBehaviour
         cellOccupationStatus.SetCellValue(cellID_x, cellID_y, state);
     }
 
+    public Cell SampleForCell(Vector3 position)
+    {
+        Cell cell = new Cell();
+        
+        Vector3 offset = position - this.transform.position;
+
+        if (Mathf.Abs(offset.x) > (float)(gridSize.x * cellSize) / 2.0f || Mathf.Abs(offset.y) > (float)(gridSize.y * cellSize) / 2.0f)
+        {
+            //print ("Sampled outside boundary"); //test
+            return null;
+        }
+
+        float[] rawDistInCells = {  ((offset.x + (Mathf.Sign(offset.x) * gridSize.x%2 * (float)cellSize / 2.0f)) / (float)cellSize),
+                                    ((offset.y + (Mathf.Sign(offset.y) * gridSize.y%2 * (float)cellSize / 2.0f)) / (float)cellSize)};
+
+        int[] rawDistSigns = {(int)Mathf.Sign(rawDistInCells[0]), (int)Mathf.Sign(rawDistInCells[1])};
+
+        Vector2Int distInCells = new Vector2Int(Mathf.FloorToInt(Mathf.Abs(rawDistInCells[0])) * rawDistSigns[0],
+                                                Mathf.FloorToInt(Mathf.Abs(rawDistInCells[1])) * rawDistSigns[1]);
+        
+        //Compute position of cell's centre.
+        //TODO simplify the eqns bellow.
+        cell.cellCentre.x = (float)(distInCells.x * cellSize);
+        cell.cellCentre.x += (1 - gridSize.x%2) * (float)cellSize / 2.0f * rawDistSigns[0]; //special consideration for even numbered cell x count.
+
+        cell.cellCentre.y = (float)(distInCells.y * cellSize);
+        cell.cellCentre.y += (1 - gridSize.y%2) * (float)cellSize / 2.0f * rawDistSigns[1]; //special consideration for even numbered cell y count.
+
+        cell.cellCentre.z = this.transform.position.z;
+
+        //Compute cellID
+        //IMPORTANT! You're gambling that the calculations above WILL NEVER produce negative numbers. They should, but you need to double check that...
+        cell.cellID[0] = (uint)(Mathf.FloorToInt((float)gridSize.x / 2.0f) + distInCells.x);
+        cell.cellID[0] += (uint)((1 - gridSize.x%2) * (((1 + rawDistSigns[0]) / 2) - 1)); //special consideration for even numbered cell x count.
+
+        cell.cellID[1] = (uint)(Mathf.FloorToInt((float)gridSize.y / 2.0f) + distInCells.y);
+        cell.cellID[1] += (uint)((1 - gridSize.y%2) * (((1 + rawDistSigns[1]) / 2) - 1)); //special consideration for even numbered cell y count.
+
+        GetAllCellStates(ref cell);
+
+        //lastCellCentre = cell.cellCentre; //test
+        //print ("dist in cells: " + distInCells + ", or: " + (rawDistInCells[0] * rawDistSigns[0]) + ", " + (rawDistInCells[1] * rawDistSigns[1]) ); //test
+        //print ("cellID: " + cell.cellID[0] + ", " +cell.cellID[1]); //test
+        return cell;
+    }
+
+    public Cell SampleForCell(uint cellID_x, uint cellID_y)
+    {
+        Cell cell = new Cell();
+
+        cell.cellCentre = GetCellPosition(cellID_x, cellID_y);
+        cell.cellID[0] = cellID_x;
+        cell.cellID[1] = cellID_y;
+
+        GetAllCellStates(ref cell);
+        
+        return cell;
+    }
+
+    public Vector3 GetCellPosition (uint cellID_x, uint cellID_y)
+    {
+        Vector3 _position = this.transform.position;
+        Vector3 position = new Vector3( _position.x - (float)gridSize.x * (float)cellSize / 2.0f + cellID_x * (float)cellSize + (float)cellSize / 2.0f,
+                                        _position.y - (float)gridSize.y * (float)cellSize / 2.0f + cellID_y * (float)cellSize + (float)cellSize / 2.0f,
+                                        _position.z);
+        return position;
+    }
+
+    void GetAllCellStates(ref Cell cell)
+    {
+        GetCellOccupationState(ref cell);
+        // GetCellInfrastructureStates(ref cell);
+        // GetCellNaturalResourcesStates(ref cell);
+        // GetOtherCellStates(ref cell);
+    }
+
+    void GetCellOccupationState(ref Cell cell)
+    {   
+        switch(cellOccupationStatus.GetCellValue(cell.cellID[0], cell.cellID[1]))
+        {
+            case (0):
+            cell.isOccupied = false;
+                break;
+            case (1):
+            cell.isOccupied = true;
+                break;
+            default:
+                break;
+        }
+    }
 
 }
 
