@@ -16,7 +16,7 @@ public class GameManager : MonoBehaviour
     static public GameManager gameMan = null;
     static ControlManager controlMan = null;
     static public BuildingsManager buildMan = null;
-    static public SimulationManager simMan;
+    public SimulationManager simMan;
     static public PopulationManager popMan;
 
     void Awake()
@@ -39,12 +39,25 @@ public class GameManager : MonoBehaviour
 
     void StartNewSimulation()
     {
-        simMan.InitializeSimulation();
+        simMan.Initialize();
+        popMan.Initialize();
+        buildMan.Initialize();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void SwitchToBuildingPlacement(int buildingID)
     {
-        
+        if (controlMan.CurrentCursorMode() != ControlMode.freeMode) 
+            return;                                                    
+
+        controlMan.SwitchToObjectPlacement(buildMan.StartNewBuildingProposal(buildingID));
     }
+
+
+    public void StartWorkDay()
+    {
+        print ("Starting new work day at gameMan");
+        //block all input here (except for skip animation)
+        simMan.StartWorkDay();
+    }
+
 }

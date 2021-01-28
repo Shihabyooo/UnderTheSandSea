@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
  public enum WorkerType
     {
-        excavator, geologist, archaeologist, physician, cook
+        excavator, geologist, archaeologist, physician, cook, generic
     }
 
     public enum WorkerTrait //For future implementation
@@ -28,14 +28,16 @@ public class Worker
     public uint health {get; private set;}
     public uint sanity {get; private set;}
     public uint wage {get; private set;}
+    public WorkerType type {get; private set;}
 
-    public Worker(string workerName, System.DateTime workerHiringDate, uint workerWage, uint workerHealth = 100, uint workerSanity = 100)
+    public Worker(string workerName, System.DateTime workerHiringDate, uint workerWage, WorkerType workerType, uint workerHealth = 100, uint workerSanity = 100)
     {
         name = workerName;
         hiringDate = workerHiringDate;
         health = workerHealth;
         sanity = workerSanity;
         wage = workerWage;
+        type = workerType;
 
         traits = new List<WorkerTrait>(); //starts with an empty trait list.
     }
@@ -72,5 +74,10 @@ public class Worker
         }
 
         return false;
+    }
+
+    public uint Production()
+    {
+        return 0;
     }
 }

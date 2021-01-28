@@ -16,6 +16,7 @@ public class ControlManager : MonoBehaviour
     [SerializeField] LayerMask freeModeSelectables;
 
     CameraControl cameraControl;
+    BuildingsManager.BuildingProposal buildingToPlace = null;
 
     const float maxRayCastDistance = 1000.0f;
     Vector3 outOfViewPosition = new Vector3(0.0f, -10.0f, 0.0f); //Planned constructions will be moved to this location when the cursor is pointed outside allowable construction zone (outside grid boundaries)
@@ -52,6 +53,7 @@ public class ControlManager : MonoBehaviour
     }
 
     //Controls
+    #region controls
     public float rightClickHoldTime = 0.0f;
     [SerializeField] float rightClickHoldToPanTime = 0.5f;
     Vector3 lastMiddleClickLocation;
@@ -66,10 +68,10 @@ public class ControlManager : MonoBehaviour
             RaycastHit hit = CastRay(freeModeSelectables);
             if (hit.collider != null)
             {
-                //print ("hit: " + hit.collider.gameObject.name);
-                // Building clickedbuilding;
-                // if (hit.collider.gameObject.TryGetComponent<Building>(out clickedbuilding))
-                //     clickedbuilding.ShowDetailsOnViewer();
+                print ("hit: " + hit.collider.gameObject.name);
+                Building clickedbuilding;
+                if (hit.collider.gameObject.TryGetComponent<Building>(out clickedbuilding))
+                    clickedbuilding.ShowBuildingDashboard();
             }
         }
         else if (!IsCursorOverUI() && Input.GetMouseButtonDown(2))
@@ -113,9 +115,47 @@ public class ControlManager : MonoBehaviour
     
     }
 
+    [SerializeField] float timeBetweenScrollRotation = 0.05f;
+    float scrollHelperTimer = 1.0f;
+
     void ObjectPlacementControl()
     {
+        RaycastHit hit = CastRay(gridLayer);
+        Cell cell = Grid.grid.SampleForCell(hit.point);
+        
+        
+        if (!IsCursorOverUI() && cell != null)
+        {
+            buildingToPlace.MovePlan(cell.cellCentre);
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (buildingToPlace.Construct(cell))
+                {
+                    buildingToPlace = null;
+                    SwitchToFreeMode();
+                    return;
+                }
+            }
+        }
+        else //hide building..
+            buildingToPlace.MovePlan(outOfViewPosition);
 
+        if (Input.GetMouseButtonDown(1))
+        {
+            buildingToPlace.Cancel();
+            buildingToPlace = null;
+            SwitchToFreeMode();
+        }
+        else if (Input.mouseScrollDelta.y > 0.1f || Input.mouseScrollDelta.y < -0.1f)
+        {
+            if (scrollHelperTimer >= timeBetweenScrollRotation)
+            {
+                scrollHelperTimer = 0.0f;
+                buildingToPlace.RotatePlan(Input.mouseScrollDelta.y);
+            }
+        }
+
+        scrollHelperTimer += Time.deltaTime;
     }
 
     void MenuControl()
@@ -127,11 +167,11 @@ public class ControlManager : MonoBehaviour
     {
 
     }
-
+    #endregion
 
 
     //Camera Controls
-
+    #region camera controls
     void CameraScrollZoom()
     {
         float scrollDelta = Input.mouseScrollDelta.y;
@@ -170,9 +210,10 @@ public class ControlManager : MonoBehaviour
         cameraControl.RotateView(mouseDir, rotationOrigin);
         lastMiddleClickLocation = Input.mousePosition;
     }
-
+    #endregion
 
     //Control Utilities
+    #region control utilities
     RaycastHit CastRay(LayerMask mask)
     {
         RaycastHit hit;
@@ -182,7 +223,7 @@ public class ControlManager : MonoBehaviour
 
         Ray ray = new Ray (Camera.main.transform.position, (mousePosition - Camera.main.transform.position));
         Physics.Raycast(ray, out hit, maxRayCastDistance, mask);
-        
+        //print (hit.point);
         return hit;
     }
 
@@ -207,6 +248,15 @@ public class ControlManager : MonoBehaviour
         currentCursorMode = ControlMode.freeMode;
     }
 
+    public void SwitchToObjectPlacement(BuildingsManager.BuildingProposal building)
+    {
+        if (currentCursorMode != ControlMode.freeMode) //can only switch to building placement from freemode.
+            return;
+
+        currentCursorMode = ControlMode.objectPlacement;
+        buildingToPlace = building;
+    }
+
     public void SwitchToCellInspection()
     {
         //showCellValue = true;
@@ -217,8 +267,10 @@ public class ControlManager : MonoBehaviour
     {
         return currentCursorMode;
     }
+    #endregion
 
     //Testing Methods
+    #region testing methods
     void OnGUI()
     {
         GUIStyle style = new GUIStyle();
@@ -226,5 +278,5 @@ public class ControlManager : MonoBehaviour
 
         GUI.Label(new Rect(10, 20, 100, 20), ("current control mode: " + ((int)currentCursorMode).ToString()), style);
     }
-
+    #endregion
 }
