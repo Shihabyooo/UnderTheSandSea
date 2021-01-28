@@ -71,8 +71,30 @@ public class Grid : MonoBehaviour
 
     }
 
+    public void SetCellOccupiedState (Cell cell, bool isOccupied)
+    {
+        SetCellOccupationState(cell.cellID[0], cell.cellID[1], isOccupied? 1 : 0);
+    }
+
+    public void SetCellOccupiedState (uint cellID_x, uint cellID_y, bool isOccupied)
+    {
+        SetCellOccupationState(cellID_x, cellID_y, isOccupied? 1 : 0);
+    }
+
+    void SetCellOccupationState(uint cellID_x, uint cellID_y, int state)
+    {
+        cellOccupationStatus.SetCellValue(cellID_x, cellID_y, state);
+    }
+
+
 }
 
+public class Cell
+{
+    public uint[] cellID = new uint[2];
+    public Vector3 cellCentre;
+    public bool isOccupied = false;
+}
 
 public class GridLayer<T>
 {

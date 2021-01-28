@@ -33,6 +33,13 @@ public class GameManager : MonoBehaviour
         {
             Destroy (this.gameObject);
         }
+
+        StartNewSimulation(); //to be moved to game starting logic once implemented.
+    }
+
+    void StartNewSimulation()
+    {
+        simMan.InitializeSimulation();
     }
 
     // Update is called once per frame
