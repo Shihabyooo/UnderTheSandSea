@@ -15,6 +15,16 @@ public class PopulationManager : MonoBehaviour
         population.Clear();
     }
 
+    public uint Count(WorkerType type)
+    {
+        return population.Count(type);
+    }
+
+    public uint CountAll()
+    {
+        return population.TotalCount();
+    }
+
     public ulong ExcavationProduction()
     {
         ulong totalProduction = 0;
@@ -27,51 +37,42 @@ public class PopulationManager : MonoBehaviour
         return totalProduction;
     }
 
-    public bool HireNewWorker(WorkerType type, Building assignedWorkBuilding, SleepingTent assignedSleepingTent)
+    public void HireNewWorker(WorkerType type, Building assignedWorkBuilding, SleepingTent assignedSleepingTent, System.DateTime currentDate)
     {
-        switch(type)
-        {
-            case WorkerType.archaeologist:
-                break;
-            case WorkerType.geologist:
-                break;
-            case WorkerType.excavator:
-                break;
-            case WorkerType.cook:
-                break;
-            case WorkerType.physician:
-                break;
-            case WorkerType.generic:
-                break;
-            default:
-                break;
-        }
+        //Generate worker
+        Worker newWorker = GenerateWorker(type, currentDate);
 
-        return false;
+        //Assign to workplace.
+
+        if (assignedWorkBuilding != null) //null is the case for excavators.
+            assignedWorkBuilding.AssignWorker(newWorker);
+
+        //Assign to sleeping tent.
+        assignedSleepingTent.AssignWorker(newWorker);
+
+        //add to population
+         population.AddWorker(newWorker);
     }
 
-    // public bool CanHire(WorkerType type)
-    // {
-    //     switch(type)
-    //     {
-    //         case WorkerType.archaeologist:
+    Worker GenerateWorker (WorkerType type, System.DateTime currentDate)
+    {
+        Worker newWorker = new Worker(NameGenerator.GenerateRandomName(), currentDate, type);
+        
+        return newWorker;
+    }
 
-    //             break;
-    //         case WorkerType.geologist:
-    //             break;
-    //         case WorkerType.excavator:
-    //             break;
-    //         case WorkerType.cook:
-    //             break;
-    //         case WorkerType.physician:
-    //             break;
-    //         case WorkerType.generic:
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // }
 
+    //Testing methods
+    void OnGUI()
+    {
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 35;
+
+        GUI.Label(new Rect(10, 80, 100, 20), "Population: " + CountAll().ToString(), style);
+        style.fontSize = 25;
+        GUI.Label(new Rect(10, 120, 100, 20), "Archelogists: " + Count(WorkerType.archaeologist).ToString() + " | Geologists: " + Count(WorkerType.geologist).ToString(), style);
+        GUI.Label(new Rect(10, 150, 100, 20), "Excavators: " + Count(WorkerType.excavator).ToString() + " | Cooks: " + Count(WorkerType.cook).ToString() + " | physicians: " + Count(WorkerType.physician).ToString(), style);
+    }
 }
 
 class Population
@@ -136,7 +137,28 @@ class Population
         }
     }
 
-    public uint Count()
+    public uint Count(WorkerType type)
+    {
+        switch(type)
+        {
+            case WorkerType.archaeologist:
+                return (uint) archaelogists.Count;
+            case WorkerType.geologist:
+                return (uint) geologists.Count;
+            case WorkerType.excavator:
+                return (uint) excavators.Count;
+            case WorkerType.cook:
+                return (uint) cooks.Count;
+            case WorkerType.physician:
+                return (uint) physicians.Count;
+            case WorkerType.generic:
+                return 0;
+            default:
+                return 0;
+        }
+    }
+
+    public uint TotalCount()
     {
         return (uint)(archaelogists.Count + geologists.Count + excavators.Count + physicians.Count + cooks.Count);
     }
