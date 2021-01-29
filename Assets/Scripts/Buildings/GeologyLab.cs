@@ -13,10 +13,17 @@ public class GeologyLab : Building
 
     public override float ComputeEffectiveness()
     {
-        effectiveness = GameManager.simMan.simParam.baseGeologyLabEffectiveness;
-        //add current effects 
-        effectiveness = effectiveness * GameManager.simMan.statEffects.geologyLabEffectModifier + GameManager.simMan.statEffects.geologyLabEffectBonus;
-
+        if (assignedWorkers.Count == 0)
+        {
+            effectiveness = 0.0f;
+        }
+        else
+        {
+            effectiveness = GameManager.simMan.simParam.baseGeologyLabEffectiveness;
+            effectiveness = effectiveness * (float)assignedWorkers.Count / (float)stats.capacity;
+            //add current effects 
+            effectiveness = effectiveness * GameManager.simMan.statEffects.geologyLabEffectModifier + GameManager.simMan.statEffects.geologyLabEffectBonus;
+        }
         return effectiveness;
     }
 

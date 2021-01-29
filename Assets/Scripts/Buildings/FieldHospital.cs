@@ -13,9 +13,17 @@ public class FieldHospital : Building
 
     public override float ComputeEffectiveness()
     {
-        effectiveness = GameManager.simMan.simParam.baseFieldHospitalEffectiveness;
-        //add current effects 
-        effectiveness = effectiveness * GameManager.simMan.statEffects.fieldHospitalEffectModifier + GameManager.simMan.statEffects.fieldHospitalEffectBonus;
+        if (assignedWorkers.Count == 0)
+        {
+            effectiveness = 0.0f;
+        }
+        else
+        {
+            effectiveness = GameManager.simMan.simParam.baseFieldHospitalEffectiveness;
+            effectiveness = effectiveness * (float)assignedWorkers.Count / (float)stats.capacity;
+            //add current effects 
+            effectiveness = effectiveness * GameManager.simMan.statEffects.fieldHospitalEffectModifier + GameManager.simMan.statEffects.fieldHospitalEffectBonus;
+        }
 
         return effectiveness;
     }

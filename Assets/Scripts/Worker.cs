@@ -19,6 +19,7 @@ using UnityEngine;
         cautious, //less chance of causing negative events due to work on special tasks, but less overall performance.
         highlySkilled, //overall better performance and less chance of negative effects from special tasks, higher wage (+40%).
         unskilled, //overall lower performance and greater chance for negative effects from special tasks, lower wage (-40%).
+        weak, //health drops faster
     }
 
 [System.Serializable]
@@ -29,17 +30,20 @@ public class Worker
     System.DateTime hiringDate;
     public uint health {get; private set;}
     public uint sanity {get; private set;}
+    public uint food {get; private set;}
     public uint wage {get; private set;}
     public WorkerType type {get; private set;}
     public Building assignedWorkBuilding {get; private set;}
     public SleepingTent assignedSleepTent {get; private set;}
     
-    public Worker(Name workerName, System.DateTime workerHiringDate, WorkerType workerType, uint workerHealth = 100, uint workerSanity = 100)
+    public Worker(Name workerName, System.DateTime workerHiringDate, WorkerType workerType,
+                uint workerHealth = 100, uint workerSanity = 100, uint workerFood = 100)
     {
         name = workerName;
         hiringDate = workerHiringDate;
         health = workerHealth;
         sanity = workerSanity;
+        food = workerFood;
         type = workerType;
 
         traits = new List<WorkerTrait>(); //starts with an empty trait list.
@@ -88,6 +92,11 @@ public class Worker
     public void SetSanity(uint newSanity)
     {
         sanity = newSanity;
+    }
+
+    public void SetFood(uint newFood)
+    {
+        food = newFood;
     }
 
     public void AddTrait(WorkerTrait newTrait)

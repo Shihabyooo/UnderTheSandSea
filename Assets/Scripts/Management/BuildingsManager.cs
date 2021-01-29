@@ -9,11 +9,23 @@ public class BuildingsManager : MonoBehaviour
     BuildingProposal currentProposal = null;
     public List<Building> constructedBuildings {get; private set;}
     public List<SleepingTent> sleepingTents {get; private set;}
+    public List<FieldHospital> fieldHospitals {get; private set;}
+    public List<Canteen> canteens {get; private set;}
+    public List<GeologyLab> geologyLabs {get; private set;}
+    public List<HQ> hqs {get; private set;}
+    public List<Latrine> latrines {get; private set;}
+    public List<Lounge> lounges {get; private set;}
 
     public void Initialize()
     {
         constructedBuildings = new List<Building>();
         sleepingTents = new List<SleepingTent>();
+        canteens = new List<Canteen>();
+        fieldHospitals = new List<FieldHospital>();
+        geologyLabs = new List<GeologyLab>();
+        hqs = new List<HQ>();
+        latrines = new List<Latrine>();
+        lounges = new List<Lounge>();
     }
 
     public BuildingStats GetBuildingStats(int buildingID) 
@@ -39,16 +51,22 @@ public class BuildingsManager : MonoBehaviour
                 sleepingTents.Add(newBuilding.gameObject.GetComponent<SleepingTent>());
                 break;
             case BuildingType.canteen:
+                canteens.Add(newBuilding.gameObject.GetComponent<Canteen>());
                 break;
             case BuildingType.fieldHospital:
+                fieldHospitals.Add(newBuilding.gameObject.GetComponent<FieldHospital>());
                 break;
             case BuildingType.geologyLab:
+                geologyLabs.Add(newBuilding.gameObject.GetComponent<GeologyLab>());
                 break;
             case BuildingType.hq:
+                hqs.Add(newBuilding.gameObject.GetComponent<HQ>());
                 break;
             case BuildingType.latrine:
+                latrines.Add(newBuilding.gameObject.GetComponent<Latrine>());
                 break;
             case BuildingType.lounge:
+                lounges.Add(newBuilding.gameObject.GetComponent<Lounge>());
                 break;
             default:
                 break;
@@ -87,6 +105,8 @@ public class BuildingsManager : MonoBehaviour
 
         return tentsWithAvailableBeds[Random.Range(0, tentsWithAvailableBeds.Count - 1)];
     }
+
+
 
     //=======================================================================================================================
     //=======================================================================================================================

@@ -50,9 +50,7 @@ public class SimulationManager : MonoBehaviour
         //compute performance and update progress
         progress += Performance();
 
-        //process random events.
-
-        //Update workers stats.
+        //process random day events.
 
         OnWorkDayComponentFinish();
         yield return null;
@@ -109,6 +107,10 @@ public class SimulationManager : MonoBehaviour
 
     IEnumerator NightProcess()
     {
+        //loop over workers, modify their sanity and health based on available facilities.
+        GameManager.popMan.UpdateWorkersHealth();
+        GameManager.popMan.UpdateWorkersFood();
+        GameManager.popMan.UpdateWorkersSanity();
         OnNightComponentFinish();
         yield return null;
     }
@@ -229,10 +231,12 @@ public class SimulationParameters
 {
     public uint baseSanityLossRate {get; private set;} 
     public uint baseHealthLossRate {get; private set;}
+    public uint baseFoodLossRate {get; private set;}
     public uint baseFundsGainRate {get; private set;}
     public float disasterSanityLossModifier {get; private set;}
     public float disasterHealthLossModifier {get; private set;}
     public float performanceModifier {get; private set;}
+    public uint malnourishmentThreshold {get; private set;} //if food dropped bellow this, worker basehealth will be halved before other calcs, also affects sanity.
 
     public float baseExcavatorPerformance {get; private set;}
     public uint excavatorsPerArchaelogist {get; private set;}
@@ -246,16 +250,30 @@ public class SimulationParameters
     public float baseLatrineEffectiveness {get; private set;}
     public float baseFieldHospitalEffectiveness {get; private set;}
 
+    public uint fieldHospitalVisitorsThreshold {get; private set;} //the number of visitors after which effectiveness drops.
+    public uint baseFieldHospitalHealthRestore {get; private set;}
+
+    public uint canteenVisitorsThreshold {get; private set;} //the number of visitors after which effectiveness drops.
+    public uint baseCanteenFoodRestore {get; private set;}
+    public uint baseCanteenSanityRestore {get; private set;}
+
+    public uint latrineVisitorsThreshold {get; private set;} //the number of visitors after which effectiveness drops.
+    public uint baseLatrineSanityRestore {get; private set;}
+    
+
     public SimulationParameters(uint level) //0 = easy, 1 = medium, 2 = brutal!
     {
         if (level < 1)
         {
             baseSanityLossRate = 5;
             baseHealthLossRate = 5;
+            baseFoodLossRate = 5;
             baseFundsGainRate = 100;
             disasterSanityLossModifier = 0.5f;
             disasterHealthLossModifier = 0.5f;
             performanceModifier = 1.5f;
+            malnourishmentThreshold = 10;
+
             baseExcavatorPerformance = 0.125f;
             excavatorsPerArchaelogist = 10;
             
@@ -266,15 +284,27 @@ public class SimulationParameters
             baseCanteentEffectiveness = 1.0f;
             baseLatrineEffectiveness = 1.0f;
             baseFieldHospitalEffectiveness = 1.0f;
+
+            fieldHospitalVisitorsThreshold = 20;
+            baseFieldHospitalHealthRestore = 4;
+
+            canteenVisitorsThreshold = 20;
+            baseCanteenFoodRestore = 5;
+
+            latrineVisitorsThreshold = 20;
+            baseLatrineSanityRestore = 2;
         }
         else if (level == 1)
         {
             baseSanityLossRate = 10;
             baseHealthLossRate = 10;
+            baseFoodLossRate = 10;
             baseFundsGainRate = 75;
             disasterSanityLossModifier = 1.0f;
             disasterHealthLossModifier = 1.0f;
             performanceModifier = 1.0f;
+            malnourishmentThreshold = 15;
+
             baseExcavatorPerformance = 0.1f;
             excavatorsPerArchaelogist = 10;
 
@@ -285,15 +315,27 @@ public class SimulationParameters
             baseCanteentEffectiveness = 1.0f;
             baseLatrineEffectiveness = 1.0f;
             baseFieldHospitalEffectiveness = 1.0f;
+
+            fieldHospitalVisitorsThreshold = 20;
+            baseFieldHospitalHealthRestore = 7;
+
+            canteenVisitorsThreshold = 20;
+            baseCanteenFoodRestore = 10;
+
+            latrineVisitorsThreshold = 20;
+            baseLatrineSanityRestore = 2;
         }
         else
         {
             baseSanityLossRate = 15;
             baseHealthLossRate = 15;
+            baseFoodLossRate = 15;
             baseFundsGainRate = 50;
             disasterSanityLossModifier = 1.5f;
             disasterHealthLossModifier = 1.5f;
             performanceModifier = 0.75f;
+            malnourishmentThreshold = 20;
+
             baseExcavatorPerformance = 0.075f;
             excavatorsPerArchaelogist = 7;
 
@@ -304,6 +346,15 @@ public class SimulationParameters
             baseCanteentEffectiveness = 0.9f;
             baseLatrineEffectiveness = 0.9f;
             baseFieldHospitalEffectiveness = 0.9f;
+
+            fieldHospitalVisitorsThreshold = 15;
+            baseFieldHospitalHealthRestore = 7;
+            
+            canteenVisitorsThreshold = 15;
+            baseCanteenFoodRestore = 15;
+
+            latrineVisitorsThreshold = 15;
+            baseLatrineSanityRestore = 5;
         }
     }
 }

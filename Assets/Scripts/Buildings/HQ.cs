@@ -20,10 +20,17 @@ public class HQ : Building
 
     public override float ComputeEffectiveness()
     {
-        effectiveness = GameManager.simMan.simParam.baseHQEffectiveness;
-        //add current effects 
-        effectiveness = effectiveness * GameManager.simMan.statEffects.hqEffectModifier + GameManager.simMan.statEffects.hqEffectBonus;
-
+        if (assignedWorkers.Count == 0)
+        {
+            effectiveness = 0.0f;
+        }
+        else
+        {
+            effectiveness = GameManager.simMan.simParam.baseHQEffectiveness;
+            effectiveness = effectiveness * (float)assignedWorkers.Count / (float)stats.capacity;
+            //add current effects 
+            effectiveness = effectiveness * GameManager.simMan.statEffects.hqEffectModifier + GameManager.simMan.statEffects.hqEffectBonus;
+        }
         return effectiveness;
     }
 }

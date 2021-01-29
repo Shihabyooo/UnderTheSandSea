@@ -13,13 +13,20 @@ public class Canteen : Building
 
     public override float ComputeEffectiveness()
     {
-        effectiveness = GameManager.simMan.simParam.baseCanteentEffectiveness;
-        //add current effects 
-        effectiveness = effectiveness * GameManager.simMan.statEffects.canteentEffectModifier + GameManager.simMan.statEffects.canteentEffectBonus;
+        if (assignedWorkers.Count == 0)
+        {
+            effectiveness = 0.0f;
+        }
+        else
+        {
+            effectiveness = GameManager.simMan.simParam.baseCanteentEffectiveness;
+            effectiveness = effectiveness * (float)assignedWorkers.Count / (float)stats.capacity;
+            //add current effects 
+            effectiveness = effectiveness * GameManager.simMan.statEffects.canteentEffectModifier + GameManager.simMan.statEffects.canteentEffectBonus;
 
-        //compute traits effect
-        effectiveness += GameManager.popMan.ComputeCanteenTraitBonus();
-
+            //compute traits effect
+            effectiveness += GameManager.popMan.ComputeCanteenTraitBonus();
+        }
         return effectiveness;
     }
 }

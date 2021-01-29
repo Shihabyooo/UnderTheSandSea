@@ -13,6 +13,7 @@ public class PopulationManager : MonoBehaviour
     public void Initialize()
     {
         population.Clear();
+        workersToKill.Clear();
     }
 
 //Pop management and general stats
@@ -98,6 +99,131 @@ public class PopulationManager : MonoBehaviour
         return population.RemoveWorker(worker);
     }
 
+//Worker stats updating
+    List<Worker> workersToKill = new List<Worker>();
+    public void UpdateWorkersHealth()
+    {
+        //first compute field hospital effect
+        float healthGainRate = 0.0f;
+        
+        if (GameManager.buildMan.fieldHospitals.Count > 0)
+        {
+            //overall effectiveness => to account for overload (more visitors than facility can handle)
+
+            float visitorsPerHospital = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.fieldHospitals.Count;
+            float overallEffectiveness = Mathf.Min(visitorsPerHospital / (float)GameManager.simMan.simParam.fieldHospitalVisitorsThreshold, 1.0f);
+            float averageHospitalEffectiveness = 0.0f;
+            
+            foreach(FieldHospital hospital in GameManager.buildMan.fieldHospitals)
+            {
+                averageHospitalEffectiveness += hospital.ComputeEffectiveness();
+            }
+            averageHospitalEffectiveness = averageHospitalEffectiveness / (float) GameManager.buildMan.fieldHospitals.Count;
+
+            healthGainRate = (float)GameManager.simMan.simParam.baseFieldHospitalHealthRestore * averageHospitalEffectiveness * overallEffectiveness;
+        }
+
+        //then modify workers health
+        foreach (Worker worker in population.all)
+        {
+            uint health = worker.health;
+
+            //extreme hunger halves health
+            if (worker.food < GameManager.simMan.simParam.malnourishmentThreshold)
+                health = (uint)Mathf.RoundToInt((float) health / 2.0f);
+
+            float healthLossRate = (float)GameManager.simMan.simParam.baseHealthLossRate;
+            
+            //compute trait effects.
+            foreach (WorkerTrait trait in worker.traits)
+            {
+                switch(trait)
+                {
+                    case WorkerTrait.coward:
+                        healthLossRate = healthLossRate * 0.7f;
+                        break;
+                    case WorkerTrait.athletic:
+                        healthLossRate = healthLossRate * 0.7f;
+                        break;
+                    case WorkerTrait.weak:
+                        healthLossRate = healthLossRate * 1.7f;
+                        break;
+                }
+            }
+
+            health = (uint)Mathf.Clamp((int)health + Mathf.RoundToInt(healthGainRate - healthLossRate), 0, 100);
+            worker.SetHealth(health);
+
+            if (health == 0)
+                workersToKill.Add(worker);
+        }
+    }
+
+    public void UpdateWorkersFood()
+    {
+        float foodGain = 0.0f;
+
+        if (GameManager.buildMan.canteens.Count > 0)
+        {
+            //overall effectiveness => to account for overload (more visitors than facility can handle)
+
+            float visitorsPerCanteen = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.canteens.Count;
+            float overallEffectiveness = Mathf.Min(visitorsPerCanteen / (float)GameManager.simMan.simParam.fieldHospitalVisitorsThreshold, 1.0f);
+            float averageCanteenEffectiveness = 0.0f;
+            
+            foreach(FieldHospital hospital in GameManager.buildMan.fieldHospitals)
+            {
+                averageCanteenEffectiveness += hospital.ComputeEffectiveness();
+            }
+            averageCanteenEffectiveness = averageCanteenEffectiveness / (float) GameManager.buildMan.fieldHospitals.Count;
+
+            foodGain = (float)GameManager.simMan.simParam.baseFieldHospitalHealthRestore * averageCanteenEffectiveness * overallEffectiveness;
+        }
+
+        //then modify workers health
+        foreach (Worker worker in population.all)
+        {
+            uint food = worker.food;
+            float foodLossRate = (float)GameManager.simMan.simParam.baseFoodLossRate;
+            
+            foreach (WorkerTrait trait in worker.traits)
+            {
+                switch(trait)
+                {
+                    default:
+                        break;
+                }
+            }
+
+            food = (uint)Mathf.Clamp((int)food + Mathf.RoundToInt(foodGain - foodLossRate), 0, 100);
+            worker.SetFood(food);
+        }
+    }
+
+    public void UpdateWorkersSanity()
+    {
+        float sanityGain = 0.0f;
+
+
+        foreach (Worker worker in population.all)
+        {
+            uint sanity = worker.sanity;
+            float sanityLoss = (float)GameManager.simMan.simParam.baseSanityLossRate;
+            
+            foreach (WorkerTrait trait in worker.traits)
+            {
+                switch(trait)
+                {
+                    default:
+                        break;
+                }
+            }
+
+            sanity = (uint)Mathf.Clamp((int)sanity + Mathf.RoundToInt(sanityGain - sanityLoss), 0, 100);
+            worker.SetSanity(sanity);
+        }
+    }
+
 //Metrics computation
     public float ExcavationProduction()
     {
@@ -147,15 +273,16 @@ public class PopulationManager : MonoBehaviour
 
 class Population
 {
+    public List<Worker> all {get; private set;}
     public List<Worker> excavators {get; private set;}
     public List<Worker> geologists {get; private set;}
     public List<Worker> archaelogists {get; private set;}
     public List<Worker> physicians {get; private set;}
     public List<Worker> cooks {get; private set;}
 
-
     public Population()
     {
+        all = new  List<Worker>();
         excavators = new List<Worker>();
         geologists = new List<Worker>();
         archaelogists = new List<Worker>();
@@ -165,6 +292,8 @@ class Population
 
     public void AddWorker(Worker worker)
     {
+        all.Add(worker);
+        
         switch(worker.type)
         {
             case WorkerType.archaeologist:
@@ -193,15 +322,15 @@ class Population
         switch(worker.type)
         {
             case WorkerType.archaeologist:
-                return archaelogists.Remove(worker);
+                return (archaelogists.Remove(worker) && all.Remove(worker));
             case WorkerType.geologist:
-                return geologists.Remove(worker);
+                return (geologists.Remove(worker) && all.Remove(worker));
             case WorkerType.excavator:
-                return excavators.Remove(worker);
+                return (excavators.Remove(worker) && all.Remove(worker));
             case WorkerType.physician:
-                return physicians.Remove(worker);
+                return (physicians.Remove(worker) && all.Remove(worker));
             case WorkerType.cook:
-                return cooks.Remove(worker);
+                return (cooks.Remove(worker) && all.Remove(worker));
             default:
                 return false;
         }
@@ -230,18 +359,17 @@ class Population
 
     public uint TotalCount()
     {
-        return (uint)(archaelogists.Count + geologists.Count + excavators.Count + physicians.Count + cooks.Count);
+        //return (uint)(archaelogists.Count + geologists.Count + excavators.Count + physicians.Count + cooks.Count);
+        return (uint) all.Count;
     }
 
     public void Clear() //clears all lists
     {
+        all.Clear();
         archaelogists.Clear();
         geologists.Clear();
         excavators.Clear();
         physicians.Clear();
         cooks.Clear();
     }
-
-
-
 }
