@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum ControlMode
 {
-    freeMode, objectPlacement, menu, cellInspection
+    freeMode, objectPlacement, menu, cellInspection, excavationTargetting
 }
 
 
@@ -47,6 +47,9 @@ public class ControlManager : MonoBehaviour
             case ControlMode.cellInspection:
                 CellInspectionControl();
                 break;
+            case ControlMode.excavationTargetting:
+                ExcavationTargetControl();
+                break;
             default:
                 break;
         }
@@ -70,7 +73,7 @@ public class ControlManager : MonoBehaviour
             {
                 print ("hit: " + hit.collider.gameObject.name);
                 Building clickedbuilding;
-                if (hit.collider.gameObject.TryGetComponent<Building>(out clickedbuilding))
+                if (hit.collider.gameObject.TryGetComponent<Building>(out clickedbuilding) && !clickedbuilding.isUnderConstruction)
                     clickedbuilding.ShowBuildingDashboard();
             }
         }
@@ -169,6 +172,52 @@ public class ControlManager : MonoBehaviour
     }
     #endregion
 
+    GameObject fieldViz = null;
+    float vizFieldRadius = 3.0f;
+    float minVizFieldRadius = 2.0f, maxVizFieldRadius = 5.0f;
+    [SerializeField] Material fieldMaterial;
+    void ExcavationTargetControl()
+    {
+        RaycastHit hit = CastRay(gridLayer);
+        Cell cell = Grid.grid.SampleForCell(hit.point);
+
+        if (cell != null)
+        {
+            fieldViz.GetComponent<LineRenderer>().enabled = true;
+            fieldViz.transform.position = cell.cellCentre + new Vector3(0.0f, 0.0f, - 0.25f);
+        }
+        else
+        {
+            fieldViz.GetComponent<LineRenderer>().enabled = false;
+        }
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            Destroy(fieldViz);
+            fieldViz = null;
+            GameManager.gameMan.SetExcavationArea(cell, vizFieldRadius);
+            SwitchToFreeMode();
+        }
+        else if (Input.GetMouseButtonDown(1))
+        {
+            Destroy(fieldViz);
+            fieldViz = null;
+            SwitchToFreeMode();
+        }
+        else if (Input.mouseScrollDelta.y > 0.1f || Input.mouseScrollDelta.y < -0.1f)
+        {
+            if (scrollHelperTimer >= timeBetweenScrollRotation)
+            {
+                scrollHelperTimer = 0.0f;
+                //buildingToPlace.RotatePlan(Input.mouseScrollDelta.y);
+                vizFieldRadius += Input.mouseScrollDelta.y;
+                vizFieldRadius = Mathf.Clamp(vizFieldRadius, minVizFieldRadius, maxVizFieldRadius);
+                ReDrawFieldVizCircle();
+            }
+        }
+
+        scrollHelperTimer += Time.deltaTime;
+    }
 
     //Camera Controls
     #region camera controls
@@ -231,18 +280,24 @@ public class ControlManager : MonoBehaviour
     {
         return UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
     }
+    
+    void ReDrawFieldVizCircle()
+    {
+        LineRenderer renderer = fieldViz.GetComponent<LineRenderer>();
+        renderer.positionCount = 0;
+        renderer.positionCount = 360;
+        for (int i = 0; i < 360; i++)
+        {
+            Vector3 position = new Vector3( vizFieldRadius * Mathf.Sin(Mathf.Deg2Rad * (float)i),
+                                            vizFieldRadius * Mathf.Cos(Mathf.Deg2Rad * (float)i),
+                                            0.0f);
+            renderer.SetPosition(i, position);
+        }
+    }
+    #endregion
 
     //Other Utilities
-
-    // public void SwitchToObjectPlacement(BuildingsManager.BuildingProposal building)
-    // {
-    //     if (currentCursorMode != ControlMode.freeMode) //can only switch to building placement from freemode.
-    //         return;
-
-    //     currentCursorMode = ControlMode.buildingPlacement;
-    //     buildingToPlace = building;
-    // }
-
+    #region other utilites
     public void SwitchToFreeMode()
     {
         currentCursorMode = ControlMode.freeMode;
@@ -261,6 +316,27 @@ public class ControlManager : MonoBehaviour
     {
         //showCellValue = true;
         currentCursorMode = ControlMode.cellInspection;
+    }
+
+    public void SwitchToExcavationTargetting()
+    {
+        currentCursorMode = ControlMode.excavationTargetting;
+        if (fieldViz != null)
+            Destroy(fieldViz);
+
+        fieldViz = new GameObject("FieldViz");
+        fieldViz.transform.SetParent(this.transform);
+        
+        LineRenderer renderer = fieldViz.AddComponent<LineRenderer>();
+        renderer.useWorldSpace = false;
+        renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+        renderer.material = fieldMaterial;
+        renderer.loop = true;
+        renderer.startWidth = 0.25f;
+        renderer.endWidth = 0.25f;
+
+
+        ReDrawFieldVizCircle();
     }
 
     public ControlMode CurrentCursorMode()
