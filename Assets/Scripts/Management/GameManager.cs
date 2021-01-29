@@ -19,6 +19,8 @@ public class GameManager : MonoBehaviour
     public SimulationManager simMan;
     static public PopulationManager popMan;
 
+    static public GameObject canvas;
+
     void Awake()
     {
         if (gameMan == null)
@@ -28,6 +30,8 @@ public class GameManager : MonoBehaviour
             buildMan = this.gameObject.GetComponent<BuildingsManager>();
             simMan = this.gameObject.GetComponent<SimulationManager>();
             popMan = this.gameObject.GetComponentInChildren<PopulationManager>();
+
+            canvas = GameObject.Find("Canvas");
         }
         else
         {
@@ -60,4 +64,30 @@ public class GameManager : MonoBehaviour
         simMan.StartWorkDay();
     }
 
+    public void HireWorker(WorkerType type, Building sourceBuilding) //Source building => building that the hiring was started from.
+    {
+        if (type == WorkerType.excavator) //Excavators aren't assigned to a building, hired only from HQ.
+        {
+            popMan.HireNewWorker(type,
+                                null,
+                                buildMan.GetVacantBed(),
+                                simMan.currentDate);
+        }
+        else
+        {
+            popMan.HireNewWorker(type,
+                                sourceBuilding,
+                                buildMan.GetVacantBed(),
+                                simMan.currentDate);
+        }
+    }
+
+    public void StartSelectingExcavationArea()
+    {
+        controlMan.SwitchToExcavationTargetting();
+    }
+    public void SetExcavationArea(Cell cell, float radius)
+    {
+        
+    }
 }

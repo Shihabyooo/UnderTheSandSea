@@ -11,7 +11,7 @@ public class SleepingTent : Building
 
     public uint AvailableBeds()
     {
-        return (uint)Mathf.Max(stats.capacity - assignedWorkers.Count , 0);
+        return AvailableSlots();
     }
 
 }

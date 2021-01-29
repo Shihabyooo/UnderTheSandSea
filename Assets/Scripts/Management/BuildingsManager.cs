@@ -13,6 +13,7 @@ public class BuildingsManager : MonoBehaviour
     public void Initialize()
     {
         constructedBuildings = new List<Building>();
+        sleepingTents = new List<SleepingTent>();
     }
 
     public BuildingStats GetBuildingStats(int buildingID) 
@@ -59,7 +60,19 @@ public class BuildingsManager : MonoBehaviour
         return constructedBuildings.Remove(building);
     }
 
-    public SleepingTent AvailableBed() //returns a random SleepingTent with at least one empty bed.
+    public uint TotalAvailableBeds()
+    {
+        uint count = 0;
+
+        foreach (SleepingTent tent in sleepingTents)
+        {
+            count += tent.AvailableBeds();
+        }
+
+        return count;
+    }
+
+    public SleepingTent GetVacantBed() //returns a random SleepingTent with at least one empty bed.
     {
         List<SleepingTent> tentsWithAvailableBeds = new List<SleepingTent>();
 

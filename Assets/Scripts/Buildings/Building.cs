@@ -20,6 +20,7 @@ public class Building : MonoBehaviour
     [SerializeField] protected BuildingStats stats;
     public  List<Worker> assignedWorkers {get; private set;}
 
+    protected GameObject dashboard;
 
     virtual protected void Awake()
     {
@@ -30,7 +31,7 @@ public class Building : MonoBehaviour
     
     //building construction methods
     #region construction
-    bool isUnderConstruction = false;
+    public bool isUnderConstruction {get; private set;}
     uint constructionDaysElapsed = 0;
     public virtual void BeginConstruction(Cell cell)
     {
@@ -56,6 +57,7 @@ public class Building : MonoBehaviour
         SimulationManager.onNewDay -= ProgressConstruction;
         isUnderConstruction = false;
         constructionDate = date;
+        GameManager.buildMan.AddBuilding(this);
     }
     #endregion
 
@@ -90,6 +92,11 @@ public class Building : MonoBehaviour
         print ("WARNING! Unimplemented ShowBuildingDashboard.");
     }
     
+    public virtual uint AvailableSlots()
+    {
+        return (uint)Mathf.Max(stats.capacity - assignedWorkers.Count , 0);
+    }
+
     #endregion
 
 }
