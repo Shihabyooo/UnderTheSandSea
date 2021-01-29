@@ -14,12 +14,12 @@ public class SimulationManager : MonoBehaviour
     public WorkPlan workPlan = new WorkPlan();
     public SimulationParameters simParam = new SimulationParameters(1);
 
-    public uint progress {get; private set;} //discovery progress, percentage.
+    public float progress {get; private set;} //discovery progress, percentage.
 
     public void Initialize()
     {
         currentDate = new System.DateTime(startYear, startMonth, 1);
-        progress = 0;
+        progress = 0.0f;
     }
 
     public void StartWorkDay()
@@ -44,6 +44,7 @@ public class SimulationManager : MonoBehaviour
         //Update workers stats.
 
         //finialize things, show results.
+        GameManager.uiMan.UpdateProgress((uint)Mathf.FloorToInt(progress));
 
         //progress to next day
         currentDate += new System.TimeSpan(1, 0, 0, 0);
@@ -52,11 +53,19 @@ public class SimulationManager : MonoBehaviour
             onNewDay.Invoke(currentDate);
     }
 
-    uint Performance()
+    float Performance()
     {
-        uint performance = 0;
+        float effectivePerformance = 0;
         
-        return (uint)Mathf.RoundToInt((float)performance * simParam.performanceModifier);
+        //rawPerformance is the pure excavation progress, affected solely by excavators performance. Doesn't necessarilly equally affect progress because we could
+        //be digging far from where the actual target is.
+        
+        float rawPerfomance = GameManager.popMan.ExcavationProduction();
+
+        //TODO modify rawPerformance based on proximity to actual location of target, and any other factors.
+        effectivePerformance = rawPerfomance;
+
+        return (float)effectivePerformance * simParam.performanceModifier;
     }
 
     void UpdateWorkersStats() //end of day
@@ -80,6 +89,8 @@ public class WorkPlan
     public uint hours {get; private set;}
     public uint foodBudget {get; private set;}
     public uint medicineBudget {get; private set;}
+    public Vector2Int excavationAreaCentre {get; private set;} //in cell ID
+    public float excavationAreaRadius {get; private set;}
     
     public delegate void OnWorkStart(); //event delegate for special tasks
     public static OnWorkStart onWorkStart;
@@ -102,12 +113,21 @@ public class WorkPlan
     }
 
     //setters
-    public void SetPlan(System.DateTime workDayDate, uint dayWorkHours, uint dayFoodBudget, uint dayMedicineBudget)
+    public void SetPlan(System.DateTime workDayDate, uint dayWorkHours, uint dayFoodBudget, uint dayMedicineBudget,
+                        Vector2Int dayExcavationAreaCentre, float dayExcavationAreaRadius)
     {
         date = workDayDate;
         hours = dayWorkHours;
         foodBudget = dayFoodBudget;
         medicineBudget = dayMedicineBudget;
+        excavationAreaCentre = dayExcavationAreaCentre;
+        excavationAreaRadius = dayExcavationAreaRadius;
+    }
+    
+    public void SetExcavationArea(Vector2Int centre, float radius)
+    {
+        excavationAreaCentre = centre;
+        excavationAreaRadius = radius;
     }
 }
 
@@ -120,6 +140,8 @@ public class SimulationParameters
     public float disasterHealthLossModifier {get; private set;}
     public float performanceModifier {get; private set;}
 
+    public float baseExcavatorPerformance {get; private set;}
+
     public SimulationParameters(uint level) //0 = easy, 1 = medium, 2 = brutal!
     {
         if (level < 1)
@@ -130,6 +152,7 @@ public class SimulationParameters
             disasterSanityLossModifier = 0.5f;
             disasterHealthLossModifier = 0.5f;
             performanceModifier = 1.5f;
+            baseExcavatorPerformance = 0.125f;
         }
         else if (level == 2)
         {
@@ -139,6 +162,7 @@ public class SimulationParameters
             disasterSanityLossModifier = 1.0f;
             disasterHealthLossModifier = 1.0f;
             performanceModifier = 1.0f;
+            baseExcavatorPerformance = 0.1f;
         }
         else
         {
@@ -148,6 +172,7 @@ public class SimulationParameters
             disasterSanityLossModifier = 1.5f;
             disasterHealthLossModifier = 1.5f;
             performanceModifier = 0.75f;
+            baseExcavatorPerformance = 0.075f;
         }
     }
 }

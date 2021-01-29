@@ -111,9 +111,43 @@ public class Worker
         return false;
     }
 
-    public uint Production()
+    public float Production()
     {
-        return 0;
+        float performance = GameManager.simMan.simParam.baseExcavatorPerformance;
+        
+        //modify performance based on health, and traits (if applicable)
+        //Using a slightly modified Logistic function Y = L/(1+exp(-k(x-x0))) + a
+            // L = Max Value (1.0 here), k = growth rate, x0 = midpoint x, a = modification
+        
+        float healthEffect = 1.0f / (1.0f + Mathf.Exp(-0.07f*((float)health - 55.0f))) + 0.04f;
+        
+        float bonus = 0.0f;
+
+        foreach (WorkerTrait trait in traits)
+        {
+            switch (trait)
+            {
+                case WorkerTrait.athletic:
+                    bonus += 0.075f;
+                    break;
+                case WorkerTrait.lazy:
+                    bonus -= 0.1f;
+                    break;
+                case WorkerTrait.cautious:
+                    bonus -= 0.05f;
+                    break;
+                case WorkerTrait.highlySkilled:
+                    bonus += 0.1f;
+                    break;
+                case WorkerTrait.unskilled:
+                    bonus -= 0.075f;
+                    break;
+            }
+        }
+
+        performance = Mathf.Max(performance * healthEffect + performance * bonus, 0.0f);
+
+        return performance;
     }
 
 }

@@ -9,17 +9,18 @@ using UnityEngine;
 [RequireComponent(typeof(BuildingsManager))]
 //[RequireComponent(typeof(ClimateManager))]
 [RequireComponent(typeof(PopulationManager))]
-//[RequireComponent(typeof(UIManager))]
+[RequireComponent(typeof(UIManager))]
 //[RequireComponent(typeof(EconomyManager))]
 public class GameManager : MonoBehaviour
 {
     static public GameManager gameMan = null;
     static ControlManager controlMan = null;
     static public BuildingsManager buildMan = null;
-    public SimulationManager simMan;
-    static public PopulationManager popMan;
+    static public SimulationManager simMan = null;
+    static public PopulationManager popMan = null;
+    static public UIManager uiMan = null;
 
-    static public GameObject canvas;
+    static public GameObject canvas = null;
 
     void Awake()
     {
@@ -29,7 +30,8 @@ public class GameManager : MonoBehaviour
             controlMan = this.gameObject.GetComponent<ControlManager>();
             buildMan = this.gameObject.GetComponent<BuildingsManager>();
             simMan = this.gameObject.GetComponent<SimulationManager>();
-            popMan = this.gameObject.GetComponentInChildren<PopulationManager>();
+            popMan = this.gameObject.GetComponent<PopulationManager>();
+            uiMan = this.gameObject.GetComponent<UIManager>();
 
             canvas = GameObject.Find("Canvas");
         }
@@ -46,6 +48,7 @@ public class GameManager : MonoBehaviour
         simMan.Initialize();
         popMan.Initialize();
         buildMan.Initialize();
+        uiMan.Initialize();
     }
 
     public void SwitchToBuildingPlacement(int buildingID)
@@ -88,6 +91,6 @@ public class GameManager : MonoBehaviour
     }
     public void SetExcavationArea(Cell cell, float radius)
     {
-        
+        simMan.workPlan.SetExcavationArea(new Vector2Int((int)cell.cellID[0],(int)cell.cellID[1] ), radius);
     }
 }

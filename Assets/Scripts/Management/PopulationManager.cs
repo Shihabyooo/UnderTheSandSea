@@ -25,9 +25,9 @@ public class PopulationManager : MonoBehaviour
         return population.TotalCount();
     }
 
-    public ulong ExcavationProduction()
+    public float ExcavationProduction()
     {
-        ulong totalProduction = 0;
+        float totalProduction = 0.0f;
 
         foreach(Worker excavator in population.excavators)
         {
