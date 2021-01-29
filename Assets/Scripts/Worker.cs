@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-//using UnityEngine;
+using UnityEngine;
 
  public enum WorkerType
     {
@@ -17,29 +17,64 @@ using System.Collections.Generic;
         glutton, //requires more food.
         lazy, //lower productivity.
         cautious, //less chance of causing negative events due to work on special tasks, but less overall performance.
-        highlySkilled, //overall better performance and less chance of negative effects from special tasks, higher wage.
+        highlySkilled, //overall better performance and less chance of negative effects from special tasks, higher wage (+40%).
+        unskilled, //overall lower performance and greater chance for negative effects from special tasks, lower wage (-40%).
     }
 
+[System.Serializable]
 public class Worker
 {
     public List<WorkerTrait> traits {get; private set;}
-    public string name {get; private set;}
+    public Name name {get; private set;}
     System.DateTime hiringDate;
     public uint health {get; private set;}
     public uint sanity {get; private set;}
     public uint wage {get; private set;}
     public WorkerType type {get; private set;}
-
-    public Worker(string workerName, System.DateTime workerHiringDate, uint workerWage, WorkerType workerType, uint workerHealth = 100, uint workerSanity = 100)
+    
+    public Worker(Name workerName, System.DateTime workerHiringDate, WorkerType workerType, uint workerHealth = 100, uint workerSanity = 100)
     {
         name = workerName;
         hiringDate = workerHiringDate;
         health = workerHealth;
         sanity = workerSanity;
-        wage = workerWage;
         type = workerType;
 
         traits = new List<WorkerTrait>(); //starts with an empty trait list.
+
+        wage = 0;
+
+        switch(type)
+        {
+            case WorkerType.archaeologist:
+                wage = (uint)Mathf.RoundToInt( Random.Range(0.9f, 1.1f) * (float)BaseWages.archaeologist);
+                break;
+            case WorkerType.geologist:
+                wage = (uint)Mathf.RoundToInt( Random.Range(0.9f, 1.1f) * (float)BaseWages.geologist);
+                break;
+            case WorkerType.excavator:
+                wage = (uint)Mathf.RoundToInt( Random.Range(0.9f, 1.1f) * (float)BaseWages.excavator);
+                break;
+            case WorkerType.cook:
+                wage = (uint)Mathf.RoundToInt( Random.Range(0.9f, 1.1f) * (float)BaseWages.cook);
+                break;
+            case WorkerType.physician:
+                wage = (uint)Mathf.RoundToInt( Random.Range(0.9f, 1.1f) * (float)BaseWages.physician);
+                break;
+            case WorkerType.generic:
+                break;
+            default:
+                break;
+        }
+
+        foreach(WorkerTrait trait in traits)
+        {
+            if (trait == WorkerTrait.highlySkilled)
+                wage = (uint)Mathf.CeilToInt(1.2f * (float)wage);
+            else if (trait == WorkerTrait.unskilled)
+                wage = (uint)Mathf.CeilToInt(0.8f * (float)wage);
+        }
+
     }
 
     //setters
@@ -80,4 +115,14 @@ public class Worker
     {
         return 0;
     }
+
+}
+
+public struct BaseWages
+{
+    public const uint geologist = 150;
+    public const uint archaeologist = 250;
+    public const uint physician = 150;
+    public const uint cook = 100;
+    public const uint excavator = 50;
 }
