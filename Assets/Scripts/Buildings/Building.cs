@@ -4,7 +4,7 @@ using UnityEngine;
 
 public enum BuildingType
 {
-    sleepTent, hq, fieldHospital, geologistLab, canteen, lounge, latrine, undefined
+    sleepTent, hq, fieldHospital, geologyLab, canteen, lounge, latrine, undefined
 }
 
 [RequireComponent(typeof(BoxCollider))]
@@ -62,7 +62,7 @@ public class Building : MonoBehaviour
     #endregion
 
     #region workers and effects
-    public virtual bool AssignWorker(Worker newWorker)
+    public virtual bool AssignWorker(Worker newWorker) //IMPORTANT! Call this ONLY FROM WORKER CLASS!!!!!
     {
         //consider checking if worker is already assigned. Modify return to an int and return a code based on results,
 

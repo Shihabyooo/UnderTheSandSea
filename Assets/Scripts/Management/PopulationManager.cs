@@ -15,6 +15,7 @@ public class PopulationManager : MonoBehaviour
         population.Clear();
     }
 
+//Pop management and general stats
     public uint Count(WorkerType type)
     {
         return population.Count(type);
@@ -25,18 +26,6 @@ public class PopulationManager : MonoBehaviour
         return population.TotalCount();
     }
 
-    public float ExcavationProduction()
-    {
-        float totalProduction = 0.0f;
-
-        foreach(Worker excavator in population.excavators)
-        {
-            totalProduction += excavator.Production();
-        }
-        
-        return totalProduction;
-    }
-
     public void HireNewWorker(WorkerType type, Building assignedWorkBuilding, SleepingTent assignedSleepingTent, System.DateTime currentDate)
     {
         //Generate worker
@@ -45,10 +34,12 @@ public class PopulationManager : MonoBehaviour
         //Assign to workplace.
 
         if (assignedWorkBuilding != null) //null is the case for excavators.
-            assignedWorkBuilding.AssignWorker(newWorker);
+            //assignedWorkBuilding.AssignWorker(newWorker);
+            newWorker.AssignWorkBuilding(assignedWorkBuilding);
 
         //Assign to sleeping tent.
-        assignedSleepingTent.AssignWorker(newWorker);
+        //assignedSleepingTent.AssignWorker(newWorker);
+        newWorker.AssignSleepTent(assignedSleepingTent);
 
         //add to population
          population.AddWorker(newWorker);
@@ -59,6 +50,66 @@ public class PopulationManager : MonoBehaviour
         Worker newWorker = new Worker(NameGenerator.GenerateRandomName(), currentDate, type);
         
         return newWorker;
+    }
+
+    public bool CanHireWorker(WorkerType type, Building building, uint count = 1) //for excavators, building should be null.
+    {
+        //first, test whether building has capacity
+        if (building != null
+            && type != WorkerType.excavator //excavators don't need to be assigned to a work building, only sleepingtent.
+            && building.AvailableSlots() < count) 
+            return false;
+        
+        //Then, test whether we have enough beds
+        if (GameManager.buildMan.TotalAvailableBeds() < count)
+            return false;
+
+        //Now we handle special conditions that may arise (e.g. can't hire more than 10 excavators per archaelogist)
+        switch(type)
+        {
+            case WorkerType.archaeologist:
+                break;
+            case WorkerType.geologist:
+                break;
+            case WorkerType.excavator:
+            {
+                int supportedExcavCount = (int)GameManager.simMan.simParam.excavatorsPerArchaelogist * (int)Count(WorkerType.archaeologist); //Should be safe to int it. Doubt 
+                                                                                                                                            //RHS would ever exceed 2^31-1
+                if (count > (supportedExcavCount - Count(WorkerType.excavator)))
+                    return false;
+                break;
+            }
+            case WorkerType.cook:
+                break;
+            case WorkerType.physician:
+                break;
+            case WorkerType.generic:
+                break;
+            default:
+                break;
+        }
+
+        return true;
+    }
+
+    public bool RemoveWorker (Worker worker)
+    {
+        worker.PrepareForRemoval();
+        return population.RemoveWorker(worker);
+    }
+
+
+//Metrics computation
+    public float ExcavationProduction()
+    {
+        float totalProduction = 0.0f;
+
+        foreach(Worker excavator in population.excavators)
+        {
+            totalProduction += excavator.Production();
+        }
+        
+        return totalProduction;
     }
 
 

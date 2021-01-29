@@ -42,7 +42,7 @@ public class BuildingsManager : MonoBehaviour
                 break;
             case BuildingType.fieldHospital:
                 break;
-            case BuildingType.geologistLab:
+            case BuildingType.geologyLab:
                 break;
             case BuildingType.hq:
                 break;

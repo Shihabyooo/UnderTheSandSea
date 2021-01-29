@@ -59,7 +59,6 @@ public class GameManager : MonoBehaviour
         controlMan.SwitchToObjectPlacement(buildMan.StartNewBuildingProposal(buildingID));
     }
 
-
     public void StartWorkDay()
     {
         print ("Starting new work day at gameMan");
@@ -93,4 +92,15 @@ public class GameManager : MonoBehaviour
     {
         simMan.workPlan.SetExcavationArea(new Vector2Int((int)cell.cellID[0],(int)cell.cellID[1] ), radius);
     }
+
+
+
+
+    //Win/Lose cases
+
+    public void HandleBankrupcy()
+    {
+        
+    }
+
 }

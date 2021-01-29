@@ -35,15 +35,17 @@ public class HQ_Dash : MonoBehaviour
     void UpdateButtons()
     {
         //Check whether we can hire an archaelogist
-        if (hq.AvailableSlots() < 1 || GameManager.buildMan.TotalAvailableBeds() < 1)
-            hireArchaelogoistButton.enabled = false;
-        else
+        //if (hq.AvailableSlots() < 1 || GameManager.buildMan.TotalAvailableBeds() < 1)
+        if (GameManager.popMan.CanHireWorker(WorkerType.archaeologist, hq))
             hireArchaelogoistButton.enabled = true;
-        
-        if (GameManager.buildMan.TotalAvailableBeds() < 1)
-            hireExcavatorButton.enabled = false;
         else
+            hireArchaelogoistButton.enabled = false;
+        
+        //if (GameManager.buildMan.TotalAvailableBeds() < 1)
+        if (GameManager.popMan.CanHireWorker(WorkerType.excavator, null))
             hireExcavatorButton.enabled = true;
+        else
+            hireExcavatorButton.enabled = false;
     }
 
     void UpdateStats()
@@ -51,7 +53,9 @@ public class HQ_Dash : MonoBehaviour
         archaelogistsCount.text = hq.assignedWorkers.Count.ToString() + " / " + hq.GetStats().capacity.ToString();
 
         uint currentExcavCount = GameManager.popMan.Count(WorkerType.excavator);
-        excavatorsCount.text = currentExcavCount.ToString() + " / " + (currentExcavCount + GameManager.buildMan.TotalAvailableBeds()).ToString();
+        int maxExcavCount = Mathf.RoundToInt(Mathf.Min(currentExcavCount + GameManager.buildMan.TotalAvailableBeds(),
+                                                        (int)GameManager.simMan.simParam.excavatorsPerArchaelogist * (int)GameManager.popMan.Count(WorkerType.archaeologist)));
+        excavatorsCount.text = currentExcavCount.ToString() + " / " + maxExcavCount.ToString();
     }
 
     public void HireArchaelogoist()

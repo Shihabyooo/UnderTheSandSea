@@ -31,6 +31,8 @@ public class Worker
     public uint sanity {get; private set;}
     public uint wage {get; private set;}
     public WorkerType type {get; private set;}
+    public Building assignedWorkBuilding {get; private set;}
+    public SleepingTent assignedSleepTent {get; private set;}
     
     public Worker(Name workerName, System.DateTime workerHiringDate, WorkerType workerType, uint workerHealth = 100, uint workerSanity = 100)
     {
@@ -99,6 +101,30 @@ public class Worker
         return traits.Remove(trait);    
     }
 
+    public bool AssignWorkBuilding(Building building)
+    {
+        if (building == null)
+            return false;
+
+        if (assignedWorkBuilding != null)
+            assignedWorkBuilding.RemoveWorker(this);
+
+        assignedWorkBuilding = building;
+        return building.AssignWorker(this);
+    }
+
+    public bool AssignSleepTent(SleepingTent tent)
+    {
+        if (tent == null)
+            return false;
+
+        if(assignedSleepTent != null)
+            assignedSleepTent.RemoveWorker(this);
+
+        assignedSleepTent = tent;
+        return tent.AssignWorker(this);
+    }
+
     //getters and other returns
     public bool HasTrait(WorkerTrait trait)
     {
@@ -150,6 +176,18 @@ public class Worker
         return performance;
     }
 
+    //Removal
+    public void PrepareForRemoval() //only handle removal from building, removal from population will ba hanled elsewhere.
+    {
+        if (assignedWorkBuilding != null)
+            assignedWorkBuilding.RemoveWorker(this);
+
+        if (assignedSleepTent != null)
+            assignedSleepTent.RemoveWorker(this);
+        
+        assignedWorkBuilding = null;
+        assignedSleepTent = null;
+    }
 }
 
 public struct BaseWages
