@@ -10,12 +10,13 @@ public class HQ : Building
         stats.type = BuildingType.hq;
         effectiveness = GameManager.simMan.simParam.baseHQEffectiveness;
         dashboard = GameManager.canvas.transform.Find("BuildingDashboards").Find("HQ").gameObject;
+        description = "The HQ is the centre of your camp, from which all operations are managed. The HQ can be run by up to three Archaelogists. Excavation workers can be hired from the HQ.";
     }
 
     public override void ShowBuildingDashboard()
     {
         dashboard.SetActive(true);
-        dashboard.GetComponent<HQ_Dash>().Reinitialize(this);
+        dashboard.GetComponent<HQ_Dash>().Show(this);
     }
 
     public override float ComputeEffectiveness()

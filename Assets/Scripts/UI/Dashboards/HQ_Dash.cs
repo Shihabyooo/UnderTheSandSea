@@ -3,54 +3,62 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HQ_Dash : MonoBehaviour
+public class HQ_Dash : Dashboard
 {
-    Button hireArchaelogoistButton;
+    //Button hireArchaelogoistButton;
     Button hireExcavatorButton;
-    Text archaelogistsCount;
+    //Text archaelogistsCount;
     Text excavatorsCount;
 
-    HQ hq = null; //set by calling object
+    //HQ hq = null; //set by calling object
 
     
-    void Awake()
+    protected override void Awake()
     {
-        hireArchaelogoistButton = this.transform.Find("HireArchaelogist").GetComponent<Button>();
+        mainWorkerType = WorkerType.archaeologist;
+        base.Awake();
+
+        //hireArchaelogoistButton = this.transform.Find("HireArchaelogist").GetComponent<Button>();
         hireExcavatorButton = this.transform.Find("HireExcavator").GetComponent<Button>();
         
-        archaelogistsCount = this.transform.Find("ArchaelogistsCount").GetComponent<Text>();
+        //archaelogistsCount = this.transform.Find("ArchaelogistsCount").GetComponent<Text>();
         excavatorsCount = this.transform.Find("ExcavatorsCount").GetComponent<Text>();
 
+        
         //disable dashboard until needed.
-        this.gameObject.SetActive(false);
+        //this.gameObject.SetActive(false);
     }
 
-    public void Reinitialize(HQ callingHQ)
+    public override void Show(Building callingBuilding, WorkerType workerType = WorkerType.generic)
     {
-        hq = callingHQ;
-        UpdateButtons();
-        UpdateStats();
+        base.Show(callingBuilding, WorkerType.archaeologist);
+
+        //hq = callingBuilding.GetComponent<HQ>();
+        // UpdateButtons();
+        // UpdateStats();
     }
 
-    void UpdateButtons()
+    protected override void UpdateButtons()
     {
         //Check whether we can hire an archaelogist
-        //if (hq.AvailableSlots() < 1 || GameManager.buildMan.TotalAvailableBeds() < 1)
-        if (GameManager.popMan.CanHireWorker(WorkerType.archaeologist, hq))
-            hireArchaelogoistButton.enabled = true;
-        else
-            hireArchaelogoistButton.enabled = false;
-        
-        //if (GameManager.buildMan.TotalAvailableBeds() < 1)
+        // if (GameManager.popMan.CanHireWorker(WorkerType.archaeologist, hq))
+        //     hireArchaelogoistButton.enabled = true;
+        // else
+        //     hireArchaelogoistButton.enabled = false;
+        base.UpdateButtons();
+
+
+        //check whether we can hire an excavator
         if (GameManager.popMan.CanHireWorker(WorkerType.excavator, null))
             hireExcavatorButton.enabled = true;
         else
             hireExcavatorButton.enabled = false;
     }
 
-    void UpdateStats()
+    protected override void UpdateStats()
     {
-        archaelogistsCount.text = hq.assignedWorkers.Count.ToString() + " / " + hq.GetStats().capacity.ToString();
+        base.UpdateStats();
+        //archaelogistsCount.text = hq.assignedWorkers.Count.ToString() + " / " + hq.GetStats().capacity.ToString();
 
         uint currentExcavCount = GameManager.popMan.Count(WorkerType.excavator);
         int maxExcavCount = Mathf.RoundToInt(Mathf.Min(currentExcavCount + GameManager.buildMan.TotalAvailableBeds(),
@@ -58,16 +66,16 @@ public class HQ_Dash : MonoBehaviour
         excavatorsCount.text = currentExcavCount.ToString() + " / " + maxExcavCount.ToString();
     }
 
-    public void HireArchaelogoist()
-    {
-        GameManager.gameMan.HireWorker(WorkerType.archaeologist, hq);
-        UpdateButtons();
-        UpdateStats();
-    }
+    // public void HireArchaelogoist()
+    // {
+    //     GameManager.gameMan.HireWorker(WorkerType.archaeologist, hq);
+    //     UpdateButtons();
+    //     UpdateStats();
+    // }
 
     public void HireExcavator()
     {
-        GameManager.gameMan.HireWorker(WorkerType.excavator, hq);
+        GameManager.gameMan.HireWorker(WorkerType.excavator, building);
         UpdateButtons();
         UpdateStats();
     }
@@ -77,13 +85,9 @@ public class HQ_Dash : MonoBehaviour
         GameManager.gameMan.StartSelectingExcavationArea();
     }
 
-    public void Close()
+    public override void Close()
     {
-        hq = null;
-        this.gameObject.SetActive(false);
+        //hq = null;
+        base.Close();
     }
 }
-
-
-
-

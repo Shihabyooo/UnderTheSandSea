@@ -185,6 +185,25 @@ public class Worker
         return performance;
     }
 
+    static public string WorkerTypeString(WorkerType type)
+    {
+        switch (type)
+        {
+            case WorkerType.archaeologist:
+                return "Archaelogist";
+            case WorkerType.excavator:
+                return "Excavator";
+            case WorkerType.geologist:
+                return "Geologist";
+            case WorkerType.physician:
+                return "Physician";
+            case WorkerType.cook:
+                return "Cook";
+            default:
+                return "N.A";
+        }
+    }
+
     //Removal
     public void PrepareForRemoval() //only handle removal from building, removal from population will ba hanled elsewhere.
     {

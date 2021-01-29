@@ -9,6 +9,8 @@ public class UIManager : MonoBehaviour
     Transform reportViewPort;
     RosterSheet rosterSheet;
 
+    Dashboard activeDashboard = null;
+
     public void Initialize()
     {
         progressBar = GameManager.canvas.transform.Find("General").Find("ProgressBar").GetComponent<Slider>();
@@ -157,11 +159,19 @@ public class UIManager : MonoBehaviour
         reportViewPort.gameObject.SetActive(false);
     }
 
-
     public void ShowRosterSheet()
     {
         rosterSheet.enabled = true;
         rosterSheet.Show();
+    }
+
+    public void SwitchDashboard(Dashboard newDashboard)
+    {
+        if (activeDashboard != null && activeDashboard.gameObject.activeSelf && newDashboard != activeDashboard)
+        {
+            activeDashboard.Close();
+        }
+        activeDashboard = newDashboard;
     }
 
 }

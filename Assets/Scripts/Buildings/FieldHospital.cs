@@ -9,6 +9,7 @@ public class FieldHospital : Building
         base.Awake();
         stats.type = BuildingType.fieldHospital;
         effectiveness = GameManager.simMan.simParam.baseFieldHospitalEffectiveness;
+        dashboard = GameManager.canvas.transform.Find("BuildingDashboards").Find("GenericManned").gameObject;
     }
 
     public override float ComputeEffectiveness()
@@ -26,5 +27,11 @@ public class FieldHospital : Building
         }
 
         return effectiveness;
+    }
+
+    public override void ShowBuildingDashboard()
+    {
+        dashboard.SetActive(true);
+        dashboard.GetComponent<Dashboard>().Show(this, WorkerType.physician);
     }
 }

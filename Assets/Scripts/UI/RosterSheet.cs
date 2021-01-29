@@ -51,9 +51,9 @@ public class RosterSheet : MonoBehaviour
     {
         foreach(Worker worker in block)
         {
-            names.text += worker.name.Compound();
+            names.text += " " + worker.name.Compound(); //padding with space because Scrollview is bloody stupid! -_-
             names.text += "\n";
-            roles.text += Role(worker.type);
+            roles.text += Worker.WorkerTypeString(worker.type);
             roles.text += "\n";
             health.text += worker.health.ToString();
             health.text += "\n";
@@ -63,26 +63,6 @@ public class RosterSheet : MonoBehaviour
             food.text += "\n";
         }
     }
-
-    string Role(WorkerType type)
-    {
-        switch (type)
-        {
-            case WorkerType.archaeologist:
-                return "Archaelogist";
-            case WorkerType.excavator:
-                return "Excavator";
-            case WorkerType.geologist:
-                return "Geologist";
-            case WorkerType.physician:
-                return "Physician";
-            case WorkerType.cook:
-                return "Cook";
-            default:
-                return "N.A";
-        }
-    }
-
 
     public void Close()
     {

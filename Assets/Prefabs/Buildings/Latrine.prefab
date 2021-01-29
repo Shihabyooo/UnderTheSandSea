@@ -62,9 +62,11 @@ MonoBehaviour:
   stats:
     id: 7
     cost: 0
-    type: 7
+    type: 6
     constructionDuration: 1
     capacity: 0
+    minBudget: 5
+    maxBudget: 100
 --- !u!1 &7884562090174152601
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,6 +18,8 @@ public class Building : MonoBehaviour
     public  List<Worker> assignedWorkers {get; private set;}
     protected GameObject dashboard;
     public float effectiveness {get; protected set;}
+    public uint budget {get; protected set;}
+    public string description {get; protected set;}
 
     virtual protected void Awake()
     {
@@ -98,6 +100,11 @@ public class Building : MonoBehaviour
         return effectiveness;
     }
 
+    public virtual void SetBudget(uint newBudget)
+    {
+        budget = (uint)Mathf.Clamp(newBudget, stats.minBudget, stats.maxBudget);
+    }
+
     #endregion
 
 }
@@ -106,10 +113,12 @@ public class Building : MonoBehaviour
 public class BuildingStats
 {
     public int id;
-    public uint cost = 0;
+    public uint cost = 500;
     public BuildingType type = BuildingType.undefined;
     public uint constructionDuration = 1; //In days
     public uint capacity;
+    public uint minBudget = 5;
+    public uint maxBudget = 100;
 
     public BuildingStats()
     {
@@ -123,5 +132,7 @@ public class BuildingStats
         type = source.type;
         constructionDuration = source.constructionDuration;
         capacity = source.capacity;
+        minBudget = source.minBudget;
+        maxBudget = source.maxBudget;
     }
 }
