@@ -98,7 +98,6 @@ public class PopulationManager : MonoBehaviour
         return population.RemoveWorker(worker);
     }
 
-
 //Metrics computation
     public float ExcavationProduction()
     {
@@ -112,6 +111,26 @@ public class PopulationManager : MonoBehaviour
         return totalProduction;
     }
 
+    public float ComputeLoungeTraitBonus()
+    {
+        float bonus = 1.0f;
+
+        return bonus;
+    }
+    
+    public float ComputeLatrineTraitBonus()
+    {
+        float bonus = 1.0f;
+
+        return bonus;
+    }
+
+    public float ComputeCanteenTraitBonus()
+    {
+        float bonus = 1.0f;
+
+        return bonus;
+    }
 
     //Testing methods
     void OnGUI()

@@ -7,6 +7,8 @@ public class SleepingTent : Building
     protected override void Awake()
     {
         base.Awake();
+        stats.type = BuildingType.sleepTent;
+        effectiveness = GameManager.simMan.simParam.baseSleepingTentEffectiveness;
     }
 
     public uint AvailableBeds()

@@ -13,21 +13,18 @@ public class Building : MonoBehaviour
     public GameObject model {get; private set;}
     public uint[] occupiedCell = new uint[2]; //the cell this building is constructed on, set by BuildingsManager.
     public System.DateTime constructionDate {get; private set;}
-    //[SerializeField] uint constructionDuration = 1;
-    
     BoxCollider buildingCollider;
-
     [SerializeField] protected BuildingStats stats;
     public  List<Worker> assignedWorkers {get; private set;}
-
     protected GameObject dashboard;
+    public float effectiveness {get; protected set;}
 
     virtual protected void Awake()
     {
         buildingCollider = this.gameObject.GetComponent<BoxCollider>();
         assignedWorkers = new List<Worker>();
+        effectiveness = 0.0f;
     }
-    
     
     //building construction methods
     #region construction
@@ -77,7 +74,6 @@ public class Building : MonoBehaviour
     {
         return assignedWorkers.Remove(worker);
     }
-
     #endregion
 
     #region other
@@ -96,6 +92,11 @@ public class Building : MonoBehaviour
     {
         return (uint)Mathf.Max(stats.capacity - assignedWorkers.Count , 0);
     }
+    
+    public virtual float ComputeEffectiveness()
+    {
+        return effectiveness;
+    }
 
     #endregion
 
@@ -110,7 +111,6 @@ public class BuildingStats
     public uint constructionDuration = 1; //In days
     public uint capacity;
 
-   
     public BuildingStats()
     {
 

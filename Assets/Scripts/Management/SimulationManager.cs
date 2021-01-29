@@ -14,6 +14,7 @@ public class SimulationManager : MonoBehaviour
     public WorkPlan workPlan = new WorkPlan();
     public Finances fincances = new Finances();
     public SimulationParameters simParam = new SimulationParameters(1);
+    public StatusEffects statEffects = new StatusEffects();
 
     public float progress {get; private set;} //discovery progress, percentage.
 
@@ -112,7 +113,6 @@ public class SimulationManager : MonoBehaviour
         yield return null;
     }
     
-
     void OnNightComponentFinish()
     {
         helperCounter2++;
@@ -238,6 +238,14 @@ public class SimulationParameters
     public uint excavatorsPerArchaelogist {get; private set;}
     //public long startingFunds {get; private set;}
 
+    public float baseHQEffectiveness {get; private set;}
+    public float baseSleepingTentEffectiveness {get; private set;}
+    public float baseLoungeEffectiveness {get; private set;}
+    public float baseGeologyLabEffectiveness {get; private set;}
+    public float baseCanteentEffectiveness {get; private set;}
+    public float baseLatrineEffectiveness {get; private set;}
+    public float baseFieldHospitalEffectiveness {get; private set;}
+
     public SimulationParameters(uint level) //0 = easy, 1 = medium, 2 = brutal!
     {
         if (level < 1)
@@ -250,6 +258,14 @@ public class SimulationParameters
             performanceModifier = 1.5f;
             baseExcavatorPerformance = 0.125f;
             excavatorsPerArchaelogist = 10;
+            
+            baseHQEffectiveness = 1.0f;
+            baseSleepingTentEffectiveness = 1.0f;
+            baseLoungeEffectiveness = 1.0f;
+            baseGeologyLabEffectiveness = 1.0f;
+            baseCanteentEffectiveness = 1.0f;
+            baseLatrineEffectiveness = 1.0f;
+            baseFieldHospitalEffectiveness = 1.0f;
         }
         else if (level == 1)
         {
@@ -261,6 +277,14 @@ public class SimulationParameters
             performanceModifier = 1.0f;
             baseExcavatorPerformance = 0.1f;
             excavatorsPerArchaelogist = 10;
+
+            baseHQEffectiveness = 1.0f;
+            baseSleepingTentEffectiveness = 1.0f;
+            baseLoungeEffectiveness = 1.0f;
+            baseGeologyLabEffectiveness = 1.0f;
+            baseCanteentEffectiveness = 1.0f;
+            baseLatrineEffectiveness = 1.0f;
+            baseFieldHospitalEffectiveness = 1.0f;
         }
         else
         {
@@ -272,6 +296,44 @@ public class SimulationParameters
             performanceModifier = 0.75f;
             baseExcavatorPerformance = 0.075f;
             excavatorsPerArchaelogist = 7;
+
+            baseHQEffectiveness = 0.9f;
+            baseSleepingTentEffectiveness = 0.9f;
+            baseLoungeEffectiveness = 0.9f;
+            baseGeologyLabEffectiveness = 0.9f;
+            baseCanteentEffectiveness = 0.9f;
+            baseLatrineEffectiveness = 0.9f;
+            baseFieldHospitalEffectiveness = 0.9f;
         }
     }
+}
+
+public class StatusEffects //these are changed by events and external factors that apply per simulation.
+{
+    // variables ending with "Modifier" will be multiplied with respective base value.
+    //variables ending with "Bonus" will be added to respective base value.
+    //Modifiers are applied before bonuses.
+
+    //Note: These stats are distinct from worker trait effects.
+
+    public float hqEffectModifier = 1.0f;
+    public float hqEffectBonus = 0.0f;
+
+    public float sleepingTentEffectModifier = 1.0f;
+    public float sleepingTentEffectBonus = 0.0f;
+
+    public float loungeEffectModifier = 1.0f;
+    public float loungEffectBonus = 0.0f;
+
+    public float latrineEffectModifier = 1.0f;
+    public float latrineEffectBonus = 0.0f;
+    
+    public float canteentEffectModifier = 1.0f;
+    public float canteentEffectBonus = 0.0f;
+    
+    public float fieldHospitalEffectModifier = 1.0f;
+    public float fieldHospitalEffectBonus = 0.0f;
+    
+    public float geologyLabEffectModifier = 1.0f;
+    public float geologyLabEffectBonus = 0.0f;
 }
