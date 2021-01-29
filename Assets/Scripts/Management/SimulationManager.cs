@@ -12,6 +12,7 @@ public class SimulationManager : MonoBehaviour
     public static OnNewDay onNewDay;
 
     public WorkPlan workPlan = new WorkPlan();
+    public Finances fincances = new Finances();
     public SimulationParameters simParam = new SimulationParameters(1);
 
     public float progress {get; private set;} //discovery progress, percentage.
@@ -131,6 +132,38 @@ public class WorkPlan
     }
 }
 
+public class Finances
+{
+    public long funds {get; private set;}
+
+
+    public Finances()
+    {
+        funds = 1000;
+    }
+
+
+    public void AddFunds(uint revenue)
+    {
+        funds += (int)revenue;
+    }
+
+    public void SubtractFunds(uint expense)
+    {
+        funds -= expense;
+        
+        if (funds < 0)
+            GameManager.gameMan.HandleBankrupcy();
+    }
+    
+    public bool CanAfford(uint expense)
+    {
+        if (expense > funds)
+            return false;
+        return true;
+    }
+}
+
 public class SimulationParameters
 {
     public uint baseSanityLossRate {get; private set;} 
@@ -141,6 +174,8 @@ public class SimulationParameters
     public float performanceModifier {get; private set;}
 
     public float baseExcavatorPerformance {get; private set;}
+    public uint excavatorsPerArchaelogist {get; private set;}
+    //public long startingFunds {get; private set;}
 
     public SimulationParameters(uint level) //0 = easy, 1 = medium, 2 = brutal!
     {
@@ -153,8 +188,9 @@ public class SimulationParameters
             disasterHealthLossModifier = 0.5f;
             performanceModifier = 1.5f;
             baseExcavatorPerformance = 0.125f;
+            excavatorsPerArchaelogist = 10;
         }
-        else if (level == 2)
+        else if (level == 1)
         {
             baseSanityLossRate = 10;
             baseHealthLossRate = 10;
@@ -163,6 +199,7 @@ public class SimulationParameters
             disasterHealthLossModifier = 1.0f;
             performanceModifier = 1.0f;
             baseExcavatorPerformance = 0.1f;
+            excavatorsPerArchaelogist = 10;
         }
         else
         {
@@ -173,6 +210,7 @@ public class SimulationParameters
             disasterHealthLossModifier = 1.5f;
             performanceModifier = 0.75f;
             baseExcavatorPerformance = 0.075f;
+            excavatorsPerArchaelogist = 7;
         }
     }
 }
