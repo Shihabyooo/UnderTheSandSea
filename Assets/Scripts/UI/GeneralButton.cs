@@ -27,6 +27,9 @@ void Awake()
             case 3: //Day report skip typing
                 GameManager.uiMan.SkipReportTyping();
                 break;
+            case 4: //Roster sheet
+                GameManager.uiMan.ShowRosterSheet();
+                break;
             default:
                 break;
         }

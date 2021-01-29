@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PopulationManager : MonoBehaviour
 {
-    Population population;
+    public Population population {get; private set;}
     void Awake()
     {
         population = new Population();
@@ -271,7 +271,7 @@ public class PopulationManager : MonoBehaviour
     }
 }
 
-class Population
+public class Population
 {
     public List<Worker> all {get; private set;}
     public List<Worker> excavators {get; private set;}

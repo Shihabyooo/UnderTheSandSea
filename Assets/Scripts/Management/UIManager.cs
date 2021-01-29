@@ -7,18 +7,21 @@ public class UIManager : MonoBehaviour
 {
     Slider progressBar;
     Transform reportViewPort;
+    RosterSheet rosterSheet;
 
     public void Initialize()
     {
         progressBar = GameManager.canvas.transform.Find("General").Find("ProgressBar").GetComponent<Slider>();
         reportViewPort = GameManager.canvas.transform.Find("DayReport");
+        rosterSheet = GameManager.canvas.transform.Find("RosterSheet").GetComponent<RosterSheet>();   
+
         progressBar.value = 0.0f;
         progressBar.minValue = 0.0f;
         progressBar.maxValue = 100.0f;
 
         progressBar.enabled = false;
         HideReport();
-        
+        //rosterSheet.Close();
     }
 
     public void UpdateProgress(uint newProgress)
@@ -153,4 +156,12 @@ public class UIManager : MonoBehaviour
         reportViewPort.Find("SignButton").gameObject.SetActive(false);
         reportViewPort.gameObject.SetActive(false);
     }
+
+
+    public void ShowRosterSheet()
+    {
+        rosterSheet.enabled = true;
+        rosterSheet.Show();
+    }
+
 }

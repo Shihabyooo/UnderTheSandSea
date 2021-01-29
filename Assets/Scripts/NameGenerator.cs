@@ -38,4 +38,9 @@ public struct Name
         first = firstName;
         last = lastName;
     }
+
+    public string Compound()
+    {
+        return first + " " + last;
+    }
 }
