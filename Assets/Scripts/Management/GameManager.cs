@@ -2,6 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum GameState
+{
+    intro, mainMenu, loading,
+    gameplayStage1,  //Planning stage: building construction, worker hiring, workplan setting.
+    gameplayStage2, //Work animation (after player clicks "Start Day"), day events may occur.
+    gameplayStage3,  //Showing day results
+    gameplayStage4,  //post-results, before start of new day. Workers rest, night events may occur.
+    endGame,        //Win-Lose animation/screen. Afterwards, returns to mainMenu.
+    defaultState
+}
+
 
 [RequireComponent(typeof(ControlManager))]
 //[RequireComponent(typeof(ResourcesManager))]
@@ -21,6 +32,7 @@ public class GameManager : MonoBehaviour
     static public UIManager uiMan = null;
 
     static public GameObject canvas = null;
+    static public GameState currentGameState {get; private set;}
 
     void Awake()
     {
@@ -43,12 +55,15 @@ public class GameManager : MonoBehaviour
         StartNewSimulation(); //to be moved to game starting logic once implemented.
     }
 
-    void StartNewSimulation()
+    void StartNewSimulation() //i.e. new game.
     {
         simMan.Initialize();
         popMan.Initialize();
         buildMan.Initialize();
         uiMan.Initialize();
+
+        currentGameState = GameState.gameplayStage1;
+        SimulationManager.onNewDay += FinishNight;
     }
 
     public void SwitchToBuildingPlacement(int buildingID)
@@ -59,11 +74,38 @@ public class GameManager : MonoBehaviour
         controlMan.SwitchToObjectPlacement(buildMan.StartNewBuildingProposal(buildingID));
     }
 
-    public void StartWorkDay()
+    public void StartWorkDay() //Called when clicking on "Start Day" button.
     {
+        if (currentGameState != GameState.gameplayStage1)
+        {
+            print ("WARNING! Attempted to start a new day from a gamestage that isn't gameStage1");
+            return;
+        }
+
         print ("Starting new work day at gameMan");
         //block all input here (except for skip animation)
+        currentGameState = GameState.gameplayStage2;
         simMan.StartWorkDay();
+    }
+
+    public void FinishWorkDay() //called by simMan after both day work coroutines finish
+    {
+        currentGameState = GameState.gameplayStage3;
+        uiMan.ShowDayReport();
+    }
+
+    public void StartNight() //called when clicking on "Sign" button on day report.
+    {
+        uiMan.HideReport();
+        currentGameState = GameState.gameplayStage4;
+        simMan.StartNight();
+        //start night animation/event decision.
+    }
+
+    public void FinishNight(System.DateTime date) //delegated to onNewDay event in simMan
+    {
+        currentGameState = GameState.gameplayStage1;
+        //re-enable player control for construction, planning and management.
     }
 
     public void HireWorker(WorkerType type, Building sourceBuilding) //Source building => building that the hiring was started from.
@@ -88,19 +130,15 @@ public class GameManager : MonoBehaviour
     {
         controlMan.SwitchToExcavationTargetting();
     }
+
     public void SetExcavationArea(Cell cell, float radius)
     {
         simMan.workPlan.SetExcavationArea(new Vector2Int((int)cell.cellID[0],(int)cell.cellID[1] ), radius);
     }
 
-
-
-
     //Win/Lose cases
-
     public void HandleBankrupcy()
     {
-        
+        currentGameState = GameState.endGame;
     }
-
 }

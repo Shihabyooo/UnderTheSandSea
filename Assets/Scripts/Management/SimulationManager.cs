@@ -23,16 +23,25 @@ public class SimulationManager : MonoBehaviour
         progress = 0.0f;
     }
 
+    //Day Time
+    Coroutine workingAnimation = null;
+    Coroutine workingProcess = null;
+    int helperCounter = 0;
+    
     public void StartWorkDay()
     {
-        //TODO redo this part to run as two coroutines:
-            //1- handles animation (with skipping functionality)
-            //2- handles remaining tasks (performance updating, random events decision, etc)
-        //At end of execution, each coroutine calls a function with a counter and checks for counter >= 2 (to mark both courtines finishing), then
-        //continue to wrap up day and show results.
+        workingAnimation = StartCoroutine(WorkAnimation());
+        workingProcess = StartCoroutine(WorkProcess());
+    }
 
-        //Start animation
+    IEnumerator WorkAnimation()
+    {
+        OnWorkDayComponentFinish();
+        yield return null;
+    }
 
+    IEnumerator WorkProcess()
+    {
         //process special tasks.
         if (WorkPlan.onWorkStart != null)
             WorkPlan.onWorkStart.Invoke();
@@ -44,14 +53,25 @@ public class SimulationManager : MonoBehaviour
 
         //Update workers stats.
 
+        OnWorkDayComponentFinish();
+        yield return null;
+    }
+    
+    void OnWorkDayComponentFinish() //called only by WorkAnimation () and WorkProcess() coroutines.
+    {
+        helperCounter++;
+        if (helperCounter < 2)
+            return;
+
+        //reaching here means that both coroutines have finished
+        helperCounter = 0;
+        workingAnimation = null;
+        workingProcess = null;
+        
         //finialize things, show results.
         GameManager.uiMan.UpdateProgress((uint)Mathf.FloorToInt(progress));
 
-        //progress to next day
-        currentDate += new System.TimeSpan(1, 0, 0, 0);
-        
-        if (onNewDay != null)
-            onNewDay.Invoke(currentDate);
+        GameManager.gameMan.FinishWorkDay();
     }
 
     float Performance()
@@ -69,7 +89,48 @@ public class SimulationManager : MonoBehaviour
         return (float)effectivePerformance * simParam.performanceModifier;
     }
 
-    void UpdateWorkersStats() //end of day
+    //Night time
+    Coroutine nightAnimation = null;
+    Coroutine nightProcess = null;
+    int helperCounter2 = 0;
+
+    public void StartNight()
+    {
+        nightAnimation = StartCoroutine(NightAnimation());
+        nightProcess = StartCoroutine(NightProcess());
+    }
+
+    IEnumerator NightAnimation()
+    {
+        OnNightComponentFinish();
+        yield return null;
+    }
+
+    IEnumerator NightProcess()
+    {
+        OnNightComponentFinish();
+        yield return null;
+    }
+    
+
+    void OnNightComponentFinish()
+    {
+        helperCounter2++;
+        if (helperCounter2 < 2)
+            return;
+
+        helperCounter2 = 0;
+        nightAnimation = null;
+        nightProcess = null;
+
+        //progress to next day
+        currentDate += new System.TimeSpan(1, 0, 0, 0);
+        
+        if (onNewDay != null)
+            onNewDay.Invoke(currentDate);
+    }
+
+    void UpdateWorkersStats() //before next day starts
     {
         // foreach(Worker worker in GameManager.popMan.)
     }

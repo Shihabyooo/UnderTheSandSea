@@ -21,6 +21,12 @@ void Awake()
             case 1: //start new day
                 GameManager.gameMan.StartWorkDay();
                 break;
+            case 2: //Day Report acknowledgement/finish
+                GameManager.gameMan.StartNight();
+                break;
+            case 3: //Day report skip typing
+                GameManager.uiMan.SkipReportTyping();
+                break;
             default:
                 break;
         }
