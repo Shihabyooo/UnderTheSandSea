@@ -26,6 +26,9 @@ public class BuildingsManager : MonoBehaviour
         hqs = new List<HQ>();
         latrines = new List<Latrine>();
         lounges = new List<Lounge>();
+        
+        if (currentProposal != null)
+            currentProposal.Cancel();
     }
 
     public BuildingStats GetBuildingStats(int buildingID) 
@@ -116,6 +119,14 @@ public class BuildingsManager : MonoBehaviour
         }
 
         return expenses;
+    }
+
+    public void CleanUp()
+    {
+        foreach(Building building in constructedBuildings)    
+        {
+            Destroy(building.gameObject);
+        }
     }
 
     //=======================================================================================================================

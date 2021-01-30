@@ -5,15 +5,11 @@ using UnityEngine;
 public class PopulationManager : MonoBehaviour
 {
     public Population population {get; private set;}
-    void Awake()
-    {
-        population = new Population();
-    }
-
+    
     public void Initialize()
     {
-        population.Clear();
-        workersToKill.Clear();
+        population = new Population();
+        workersToKill = new List<Worker>();
     }
 
 //Pop management and general stats
@@ -241,6 +237,91 @@ public class PopulationManager : MonoBehaviour
         }
     }
 
+    public List<Name> DeadWorkersCleanup()
+    {
+        List<Name> deadList = new List<Name>();
+        print ("Cleaning up dead workers, count: " + workersToKill.Count);
+        
+        for (int i = workersToKill.Count - 1; i >= 0; i--)
+        {
+            deadList.Add(workersToKill[i].name);
+            workersToKill[i].PrepareForRemoval();
+            population.RemoveWorker(workersToKill[i]);
+            workersToKill.RemoveAt(i);
+        }
+
+        return deadList;
+    }
+
+     public void GlobalHealtyhChange (int delta) //change everyone health based on delta (positive = restore, negative = loss)
+    {
+        foreach (Worker worker in population.all)
+        {
+            int change = delta;
+            //check for modifying traits
+            foreach (WorkerTrait trait in worker.traits)
+            {
+                switch(trait)
+                {
+                    case WorkerTrait.coward:
+                        if (change < 0)
+                            change = Mathf.RoundToInt(change * 0.5f);
+                        break;
+                    case WorkerTrait.cautious:
+                        if (change < 0)
+                            change = Mathf.RoundToInt(change * 0.5f);
+                        break;
+                }
+            }
+            
+            //apply change
+            worker.SetHealth((uint)Mathf.Clamp((int)worker.health + change, 0, 100));
+        }
+    }
+
+    public void GlobalSanityChange (int delta) //change everyone sanity based on delta (positive = restore, negative = loss)
+    {
+        foreach (Worker worker in population.all)
+        {
+            int change = delta;
+            //check for modifying traits
+            foreach (WorkerTrait trait in worker.traits)
+            {
+                switch(trait)
+                {
+                    case WorkerTrait.coward:
+                        if (change < 0)
+                            change = Mathf.RoundToInt(change * 1.5f);
+                        break;
+                }
+            }
+            //apply change
+            worker.SetSanity((uint)Mathf.Clamp((int)worker.sanity + change, 0, 100));
+        }
+    }
+
+    public void GlobalFoodChange (int delta) //change everyone sanity based on delta (positive = restore, negative = loss)
+    {
+        foreach (Worker worker in population.all)
+        {
+            int change = delta;
+            //check for modifying traits
+            foreach (WorkerTrait trait in worker.traits)
+            {
+                switch(trait)
+                {
+                    case WorkerTrait.glutton:
+                        if (change < 0)
+                            change = Mathf.RoundToInt((Mathf.Sign(change) - 0.5f) * (float)change); //basically, 150% if negative, 50% if positive.
+                        break;
+                }
+            }
+            //apply change
+            worker.SetFood((uint)Mathf.Clamp((int)worker.food + change, 0, 100));
+        }
+    }
+   
+
 //Metrics computation
     public float ExcavationProduction()
     {
@@ -288,16 +369,16 @@ public class PopulationManager : MonoBehaviour
     }
 
     //Testing methods
-    void OnGUI()
-    {
-        GUIStyle style = new GUIStyle();
-        style.fontSize = 35;
+    // void OnGUI()
+    // {
+    //     GUIStyle style = new GUIStyle();
+    //     style.fontSize = 35;
 
-        GUI.Label(new Rect(10, 80, 100, 20), "Population: " + CountAll().ToString(), style);
-        style.fontSize = 25;
-        GUI.Label(new Rect(10, 120, 100, 20), "Archelogists: " + Count(WorkerType.archaeologist).ToString() + " | Geologists: " + Count(WorkerType.geologist).ToString(), style);
-        GUI.Label(new Rect(10, 150, 100, 20), "Excavators: " + Count(WorkerType.excavator).ToString() + " | Cooks: " + Count(WorkerType.cook).ToString() + " | physicians: " + Count(WorkerType.physician).ToString(), style);
-    }
+    //     GUI.Label(new Rect(10, 80, 100, 20), "Population: " + CountAll().ToString(), style);
+    //     style.fontSize = 25;
+    //     GUI.Label(new Rect(10, 120, 100, 20), "Archelogists: " + Count(WorkerType.archaeologist).ToString() + " | Geologists: " + Count(WorkerType.geologist).ToString(), style);
+    //     GUI.Label(new Rect(10, 150, 100, 20), "Excavators: " + Count(WorkerType.excavator).ToString() + " | Cooks: " + Count(WorkerType.cook).ToString() + " | physicians: " + Count(WorkerType.physician).ToString(), style);
+    // }
 }
 
 public class Population

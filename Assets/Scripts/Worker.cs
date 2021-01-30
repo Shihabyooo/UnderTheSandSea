@@ -205,7 +205,7 @@ public class Worker
     }
 
     //Removal
-    public void PrepareForRemoval() //only handle removal from building, removal from population will ba hanled elsewhere.
+    public void PrepareForRemoval() //IMPORTANT! ONLY CALL FROM POPULATIONMANAGER! only handle removal from building, removal from population will ba hanled elsewhere.
     {
         if (assignedWorkBuilding != null)
             assignedWorkBuilding.RemoveWorker(this);

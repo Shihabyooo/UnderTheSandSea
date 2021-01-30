@@ -8,21 +8,33 @@ public class UIManager : MonoBehaviour
     Slider progressBar;
     Transform reportViewPort;
     RosterSheet rosterSheet;
+    MainMenu mainMenu;
 
     Dashboard activeDashboard = null;
+    GameObject constructionMenu;
+    GameObject generalUI;
 
-    public void Initialize()
+    //TODO move DayReport to its own script.
+
+    void Start()
     {
         progressBar = GameManager.canvas.transform.Find("General").Find("ProgressBar").GetComponent<Slider>();
         reportViewPort = GameManager.canvas.transform.Find("DayReport");
         rosterSheet = GameManager.canvas.transform.Find("RosterSheet").GetComponent<RosterSheet>();   
+        mainMenu = GameManager.canvas.transform.Find("MainMenu").GetComponent<MainMenu>();
+        constructionMenu = GameManager.canvas.transform.Find("ConstructionMenu").gameObject;
+        generalUI = GameManager.canvas.transform.Find("General").gameObject;
+    }
 
+    public void Initialize()
+    {
         progressBar.value = 0.0f;
         progressBar.minValue = 0.0f;
         progressBar.maxValue = 100.0f;
 
         progressBar.enabled = false;
         HideReport();
+        ToggleControls(true);
         //rosterSheet.Close();
     }
 
@@ -90,7 +102,7 @@ public class UIManager : MonoBehaviour
                 System.DateTime date = GameManager.simMan.currentDate;
                 return (date.Day.ToString() + " - " + AbbreviatedMonth(date.Month) + " - " + date.Year.ToString());
             case "Progress":
-                return (GameManager.simMan.progress.ToString() + "%");
+                return (Mathf.RoundToInt(GameManager.simMan.progress).ToString() + "%");
             case "Manpower":
                 return GameManager.popMan.CountAll().ToString();
             case "Income":
@@ -165,6 +177,11 @@ public class UIManager : MonoBehaviour
         rosterSheet.Show();
     }
 
+    public void ShowMainMenu()
+    {
+        mainMenu.Show();
+    }
+
     public void SwitchDashboard(Dashboard newDashboard)
     {
         if (activeDashboard != null && activeDashboard.gameObject.activeSelf && newDashboard != activeDashboard)
@@ -172,6 +189,12 @@ public class UIManager : MonoBehaviour
             activeDashboard.Close();
         }
         activeDashboard = newDashboard;
+    }
+
+    public void ToggleControls(bool newState)
+    {
+        generalUI.SetActive(newState);
+        constructionMenu.SetActive(newState);
     }
 
 }

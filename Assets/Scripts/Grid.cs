@@ -43,10 +43,10 @@ public class Grid : MonoBehaviour
 
         //Other init stuff
         UpdateGridBoundary();
-        InitializeGridLayers();
+        //InitializeGridLayers();
     }
 
-    void InitializeGridLayers()
+    public void Initialize()
     {
         cellOccupationStatus = new GridLayer<int>(gridSize);
     }

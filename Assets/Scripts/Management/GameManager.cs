@@ -48,21 +48,20 @@ public class GameManager : MonoBehaviour
         {
             Destroy (this.gameObject);
         }
-
-        
     }
 
-    void Start()
+    public void StartNewGame()
     {
-        StartNewSimulation(); //to be moved to game starting logic once implemented.
+        StartNewSimulation();
     }
 
     void StartNewSimulation() //i.e. new game.
     {
-        simMan.Initialize();
+        simMan.Initialize(1);
         popMan.Initialize();
         buildMan.Initialize();
         uiMan.Initialize();
+        Grid.grid.Initialize();
 
         currentGameState = GameState.gameplayStage1;
         SimulationManager.onNewDay += FinishNight;
@@ -91,7 +90,9 @@ public class GameManager : MonoBehaviour
         
         uiMan.SwitchDashboard(null);
 
-        //TODO block all input here (except for skip animation)
+        uiMan.ToggleControls(false);
+
+
         currentGameState = GameState.gameplayStage2;
         simMan.StartWorkDay();
     }
@@ -115,6 +116,7 @@ public class GameManager : MonoBehaviour
     {
         currentGameState = GameState.gameplayStage1;
         //re-enable player control for construction, planning and management.
+        uiMan.ToggleControls(true);
     }
 
     public void HireWorker(WorkerType type, Building sourceBuilding) //Source building => building that the hiring was started from.
@@ -148,6 +150,20 @@ public class GameManager : MonoBehaviour
     //Win/Lose cases
     public void HandleBankrupcy()
     {
+        //This method is callled at WorkProcess(), before dayEvent is processed. So, we simply override whatever event that may have been set with a Bankrupcy event,
+        //and let it handle game loss display.
+        print ("Player is bankrupt");
         currentGameState = GameState.endGame;
+
+        GameObject eventHolder = Instantiate(new GameObject("GameOver_Bankrupcy"), Vector3.zero, new Quaternion(), this.transform);
+        ScenarioEvent newEvent = (ScenarioEvent)eventHolder.AddComponent(typeof(Bankrupcy));
+        simMan.AddScenarioEvent(newEvent, true);
+    }
+
+    public void ReturnToMainMenu()
+    {
+        buildMan.CleanUp();
+        currentGameState = GameState.mainMenu;
+        uiMan.ShowMainMenu();
     }
 }

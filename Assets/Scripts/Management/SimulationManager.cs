@@ -19,12 +19,33 @@ public class SimulationManager : MonoBehaviour
     public float progress {get; private set;} //discovery progress, percentage.
     public Vector2Int goalCell = new Vector2Int(); //the cell closes to target. Excavating near it yields better performance. Randomized each game.
 
-    public void Initialize()
+    ScenarioEvent dayEvent;
+    ScenarioEvent nightEvent;
+
+    public void Initialize(uint difficulty)
     {
         currentDate = new System.DateTime(startYear, startMonth, 1);
         progress = 0.0f;
 
         goalCell = Grid.grid.GetRandomCellID(1,1);
+
+        workPlan = new WorkPlan();
+        finances = new Finances();
+        simParam = new SimulationParameters(difficulty);
+        statEffects = new StatusEffects();
+        
+        onNewDay = null;
+
+        // dayEvents = new List<ScenarioEvent>();
+        // nightEvents = new List<ScenarioEvent>();
+
+        StopAllCoroutines();
+        workingAnimation = null;
+        workingProcess = null;
+        nightProcess = null;
+        nightAnimation = null;
+        helperCounter = 0;
+        helperCounter2 = 0;
     }
 
     //Day Time
@@ -34,6 +55,9 @@ public class SimulationManager : MonoBehaviour
     
     public void StartWorkDay()
     {
+        dayEvent = null;
+        nightEvent = null;
+
         workingAnimation = StartCoroutine(WorkAnimation());
         workingProcess = StartCoroutine(WorkProcess());
     }
@@ -54,6 +78,7 @@ public class SimulationManager : MonoBehaviour
         progress += Performance();
 
         //process random day events.
+        DecideOnRandomEnvrionmentalEvent(true);
 
         //Update Finances
         UpdateFinances();
@@ -73,9 +98,11 @@ public class SimulationManager : MonoBehaviour
         workingAnimation = null;
         workingProcess = null;
 
-        //finialize things, show results.
-        GameManager.uiMan.UpdateProgress((uint)Mathf.FloorToInt(progress));
-        GameManager.gameMan.FinishWorkDay();
+        //ProcessEvents(true);
+        if (dayEvent != null)
+            dayEvent.Play(currentDate);
+
+        StartCoroutine(WaitForDayEventFinish());
     }
 
     float Performance()
@@ -113,13 +140,16 @@ public class SimulationManager : MonoBehaviour
         ulong revenue = (ulong)Mathf.Round((float)simParam.baseFundsGainRate * statEffects.revenueEffectModifier) + statEffects.revenueEffectBonus;
         finances.AddFunds(revenue);
 
-
         //expenses
+            //excavation:
+        float excavationAreaInCells = Mathf.PI * Mathf.Pow(workPlan.excavationAreaRadius,2.0f) / Mathf.Pow(Grid.cellSize, 2.0f);
+        ulong excavationExpense = (ulong)Mathf.RoundToInt(excavationAreaInCells * (float) simParam.baseExcavationCostPerCell);
+        
+            //other
         ulong buildingExpenses = GameManager.buildMan.ComputeBuildingsExpenses();
         ulong wages = GameManager.popMan.ComputeTotalWages();
 
-        finances.SubtractFunds(buildingExpenses + wages);
-        
+        finances.SubtractFunds(excavationExpense + buildingExpenses + wages);
     }
 
     //Night time
@@ -145,6 +175,9 @@ public class SimulationManager : MonoBehaviour
         GameManager.popMan.UpdateWorkersHealth();
         GameManager.popMan.UpdateWorkersFood();
         GameManager.popMan.UpdateWorkersSanity();
+
+        DecideOnRandomEnvrionmentalEvent(false);
+
         OnNightComponentFinish();
         yield return null;
     }
@@ -159,14 +192,127 @@ public class SimulationManager : MonoBehaviour
         nightAnimation = null;
         nightProcess = null;
 
+        //ProcessEvents(false);
+        if (nightEvent != null)
+            nightEvent.Play(currentDate);
+
+
+        StartCoroutine(WaitForNightEventFinish());
+    }
+
+    //events
+    public void DecideOnRandomEnvrionmentalEvent(bool isDay)
+    {
+        if ((isDay && dayEvent != null) || (!isDay && nightEvent != null)) //means something else already set an event for that period
+            return;
+
+        float dieRoll = Random.Range(0.0f, 1.0f);
+
+        if (dieRoll < simParam.randomEnvironmentalEventProbability && EventsLists.environmentalEvents.Length > 0)
+        {
+            int id = Random.Range(0, EventsLists.environmentalEvents.Length - 1);
+            GameObject eventHolder = Instantiate(new GameObject("event_" +id.ToString()), Vector3.zero, new Quaternion(), this.transform);
+            eventHolder.name += isDay? "_day" : "night";
+            ScenarioEvent newEvent = (ScenarioEvent)eventHolder.AddComponent(System.Type.GetType(EventsLists.environmentalEvents[id]));
+            AddScenarioEvent(newEvent, isDay);
+        }
+    }
+
+    public void AddScenarioEvent(ScenarioEvent scenarioEvent, bool isDayEvent) //Warning! This method overrides any set event.
+    {
+        if (isDayEvent)
+        {
+            if (dayEvent != null)
+                dayEvent.Cancel();
+
+            dayEvent = scenarioEvent;
+        }
+        else
+        {
+            if (nightEvent != null)
+                nightEvent.Cancel();
+
+            nightEvent = scenarioEvent;
+        }
+        
+        scenarioEvent.Initialize(currentDate);
+    }
+
+    // void ProcessEvents (bool isDay)
+    // {
+    //     // List<ScenarioEvent> targetEventsList;
+    //     // if (isDay)
+    //     //     targetEventsList = dayEvents;
+    //     // else
+    //     //     targetEventsList = nightEvents;
+
+    //     // foreach(ScenarioEvent scenarioEvent in targetEventsList)
+    //     // {
+    //     //     scenarioEvent.Play(currentDate);
+    //     // }
+
+    //     if (isDay)
+    //         dayEvent.Play(currentDate);
+    //     else
+    //         nightEvent.Play(currentDate);
+    // }
+
+    public void FinishEvent(ScenarioEvent scenarioEvent)
+    {
+        if (dayEvent == scenarioEvent)
+            dayEvent = null;
+        else if (nightEvent == scenarioEvent)
+            nightEvent = null;
+        else
+            print("ERROR! Attempting to finish a non started event");
+    }
+
+    void DisplayDeadWorkersMessage(List<Name> list)
+    {
+        if (list.Count < 1) //nothing to do.
+            return;
+        
+        print ("PLACEHOLDER FOR DEAD WORKERS MESSAGE DISPLAY");
+    }
+
+    IEnumerator WaitForDayEventFinish()
+    {
+        while (dayEvent != null)
+            yield return null;
+
+        //check that the game hasn't finished (it should be stage2)
+        if (GameManager.currentGameState == GameState.mainMenu ||
+            GameManager.currentGameState == GameState.endGame)
+        {
+            print ("Halting simulation run at WaitForDayEventFinish() due to game-ending state being set");
+        }
+        else
+        {
+            //finialize things, show results.
+            GameManager.uiMan.UpdateProgress((uint)Mathf.FloorToInt(progress));
+            GameManager.gameMan.FinishWorkDay();
+            yield return null;
+        }
+    }
+
+    IEnumerator WaitForNightEventFinish()
+    {
+        while (nightEvent != null)
+            yield return null;
+
         //progress to next day
         currentDate += new System.TimeSpan(1, 0, 0, 0);
         
+        //Clean up dead workers and display message if any did.
+        DisplayDeadWorkersMessage( GameManager.popMan.DeadWorkersCleanup());
+
         if (onNewDay != null)
             onNewDay.Invoke(currentDate);
+        
+        yield return null;
     }
 
-    //test
+    //testing
     void OnGUI()
     {
         GUIStyle style = new GUIStyle();
@@ -287,10 +433,10 @@ public class SimulationParameters
     public float performanceDropPerCellWidth {get; private set;} //if the excavation was outside the area selected, performance will drop with this value for every cell width distance
     //public float minExcavationDistanceModifier {get; private set;}  //perfomance drop from distance will not go lower than this value
     public uint malnourishmentThreshold {get; private set;} //if food dropped bellow this, worker basehealth will be halved before other calcs, also affects sanity.
-    
-
+  
     public float baseExcavatorPerformance {get; private set;}
-    public uint excavatorsPerArchaelogist {get; private set;}
+    public uint excavatorsPerArchaelogist {get; private set;} //Each archelogist can manage up this figure of excavators.
+    public uint baseExcavationCostPerCell {get; private set;} //multiply by target excavation area (in cells) to get excavation cost.
     //public long startingFunds {get; private set;}
 
     public float baseHQEffectiveness {get; private set;}
@@ -311,7 +457,7 @@ public class SimulationParameters
     public uint latrineVisitorsThreshold {get; private set;} //the number of visitors after which effectiveness drops.
     public uint baseLatrineSanityRestore {get; private set;}
     
-
+    public float randomEnvironmentalEventProbability {get; private set;}
     public SimulationParameters(uint level) //0 = easy, 1 = medium, 2 = brutal!
     {
         if (level < 1)
@@ -324,12 +470,13 @@ public class SimulationParameters
             disasterHealthLossModifier = 0.5f;
             performanceModifier = 1.5f;
             performanceDropPerCellWidth = 0.25f;
-            minExcavationDistanceModifier = 0.35f;
+            //minExcavationDistanceModifier = 0.35f;
 
             malnourishmentThreshold = 10;
 
             baseExcavatorPerformance = 0.125f;
             excavatorsPerArchaelogist = 10;
+            baseExcavationCostPerCell = 25;
             
             baseHQEffectiveness = 1.0f;
             baseSleepingTentEffectiveness = 1.0f;
@@ -347,6 +494,8 @@ public class SimulationParameters
 
             latrineVisitorsThreshold = 20;
             baseLatrineSanityRestore = 2;
+
+            randomEnvironmentalEventProbability = 0.05f;
         }
         else if (level == 1)
         {
@@ -358,11 +507,12 @@ public class SimulationParameters
             disasterHealthLossModifier = 1.0f;
             performanceModifier = 1.0f;
             performanceDropPerCellWidth = 0.45f;
-            minExcavationDistanceModifier = 0.15f;
+            //minExcavationDistanceModifier = 0.15f;
             malnourishmentThreshold = 15;
 
             baseExcavatorPerformance = 0.1f;
             excavatorsPerArchaelogist = 10;
+            baseExcavationCostPerCell = 35;
 
             baseHQEffectiveness = 1.0f;
             baseSleepingTentEffectiveness = 1.0f;
@@ -380,6 +530,9 @@ public class SimulationParameters
 
             latrineVisitorsThreshold = 20;
             baseLatrineSanityRestore = 2;
+
+            randomEnvironmentalEventProbability = 0.10f;
+            //randomEnvironmentalEventProbability = 1.10f; //test
         }
         else
         {
@@ -391,11 +544,12 @@ public class SimulationParameters
             disasterHealthLossModifier = 1.5f;
             performanceModifier = 0.75f;
             performanceDropPerCellWidth = 0.5f;
-            minExcavationDistanceModifier = 0.0f;
+            //minExcavationDistanceModifier = 0.0f;
             malnourishmentThreshold = 20;
 
             baseExcavatorPerformance = 0.075f;
             excavatorsPerArchaelogist = 7;
+            baseExcavationCostPerCell = 50;
 
             baseHQEffectiveness = 0.9f;
             baseSleepingTentEffectiveness = 0.9f;
@@ -413,6 +567,8 @@ public class SimulationParameters
 
             latrineVisitorsThreshold = 15;
             baseLatrineSanityRestore = 5;
+
+            randomEnvironmentalEventProbability = 0.20f;
         }
     }
 }
