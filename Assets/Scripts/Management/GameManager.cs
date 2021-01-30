@@ -15,13 +15,10 @@ public enum GameState
 
 
 [RequireComponent(typeof(ControlManager))]
-//[RequireComponent(typeof(ResourcesManager))]
 [RequireComponent(typeof(SimulationManager))]
 [RequireComponent(typeof(BuildingsManager))]
-//[RequireComponent(typeof(ClimateManager))]
 [RequireComponent(typeof(PopulationManager))]
 [RequireComponent(typeof(UIManager))]
-//[RequireComponent(typeof(EconomyManager))]
 public class GameManager : MonoBehaviour
 {
     static public GameManager gameMan = null;
@@ -52,6 +49,11 @@ public class GameManager : MonoBehaviour
             Destroy (this.gameObject);
         }
 
+        
+    }
+
+    void Start()
+    {
         StartNewSimulation(); //to be moved to game starting logic once implemented.
     }
 
@@ -83,7 +85,13 @@ public class GameManager : MonoBehaviour
         }
 
         print ("Starting new work day at gameMan");
-        //block all input here (except for skip animation)
+        //close current open windows
+        if (RosterSheet.rosterSheet.enabled)
+            RosterSheet.rosterSheet.Close();
+        
+        uiMan.SwitchDashboard(null);
+
+        //TODO block all input here (except for skip animation)
         currentGameState = GameState.gameplayStage2;
         simMan.StartWorkDay();
     }
@@ -97,6 +105,7 @@ public class GameManager : MonoBehaviour
     public void StartNight() //called when clicking on "Sign" button on day report.
     {
         uiMan.HideReport();
+        simMan.finances.ResetDayStatistics();
         currentGameState = GameState.gameplayStage4;
         simMan.StartNight();
         //start night animation/event decision.

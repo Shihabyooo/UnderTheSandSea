@@ -94,11 +94,11 @@ public class UIManager : MonoBehaviour
             case "Manpower":
                 return GameManager.popMan.CountAll().ToString();
             case "Income":
-                return "TBD";
+                return ("$" + GameManager.simMan.finances.dayRevenue.ToString());
             case "Expenses":
-                return "TBD";
+                return ("$" + GameManager.simMan.finances.dayExpenses.ToString());
             case "Funds":
-                return("$" + GameManager.simMan.fincances.funds.ToString());
+                return("$" + GameManager.simMan.finances.funds.ToString());
         }
 
         return detail;

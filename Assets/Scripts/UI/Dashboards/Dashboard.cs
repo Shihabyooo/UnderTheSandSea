@@ -12,6 +12,7 @@ public class Dashboard : MonoBehaviour
     protected Building building = null;
     Slider budgetSlider = null;
     Text budgetText = null;
+    Text effectiveness = null;
 
     protected virtual void Awake()
     {
@@ -26,6 +27,7 @@ public class Dashboard : MonoBehaviour
             budgetSlider = this.transform.Find("BudgetSlider").GetComponent<Slider>();
             budgetSlider.onValueChanged.AddListener(OnBudgetSliderChange);
         }
+        effectiveness = this.transform.Find("Effectiveness").GetComponent<Text>();
     }
 
     public virtual void Show(Building callingBuilding, WorkerType workerType = WorkerType.generic)
@@ -33,7 +35,10 @@ public class Dashboard : MonoBehaviour
         GameManager.uiMan.SwitchDashboard(this);
         building = callingBuilding;
         mainWorkerType = workerType;
-        this.transform.Find("MainWorkerHeading").GetComponent<Text>().text = "Assigned " + Worker.WorkerTypeString(workerType)  + ":";
+
+        if (this.transform.Find("MainWorkerHeading") != null)
+            this.transform.Find("MainWorkerHeading").GetComponent<Text>().text = "Assigned " + Worker.WorkerTypeString(workerType)  + ":";
+        
         this.transform.Find("Description").GetComponent<Text>().text = building.description;
         this.transform.Find("Title").GetComponent<Text>().text = building.gameObject.name;
 
@@ -45,12 +50,15 @@ public class Dashboard : MonoBehaviour
 
     protected virtual void UpdateButtons()
     {
-        mainWorkerHireButton.enabled = GameManager.popMan.CanHireWorker(mainWorkerType, building);
+        if (mainWorkerHireButton != null)
+            mainWorkerHireButton.enabled = GameManager.popMan.CanHireWorker(mainWorkerType, building);
     }
 
     protected virtual void UpdateStats()
     {
-        mainWorkerCount.text = building.assignedWorkers.Count.ToString() + " / " + building.GetStats().capacity.ToString();
+        if (mainWorkerCount != null)
+            mainWorkerCount.text = building.assignedWorkers.Count.ToString() + " / " + building.GetStats().capacity.ToString();
+        effectiveness.text = Mathf.RoundToInt(building.ComputeEffectiveness() * 100.0f).ToString() + "%";
     }
 
     protected virtual void UpdateBudget()

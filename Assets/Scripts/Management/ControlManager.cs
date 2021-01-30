@@ -64,6 +64,9 @@ public class ControlManager : MonoBehaviour
     Vector3 rotationOrigin = new Vector3();
     void FreeModeControl()
     {
+        //CastRay(freeModeSelectables);//test
+
+
         if (!IsCursorOverUI() //Effectively prevents attempting to selectobjects/cast ray if over a UI element
             && Input.GetMouseButtonDown(0)) 
         {
@@ -71,7 +74,7 @@ public class ControlManager : MonoBehaviour
             RaycastHit hit = CastRay(freeModeSelectables);
             if (hit.collider != null)
             {
-                print ("hit: " + hit.collider.gameObject.name);
+                //print ("hit: " + hit.collider.gameObject.name); //test
                 Building clickedbuilding;
                 if (hit.collider.gameObject.TryGetComponent<Building>(out clickedbuilding) && !clickedbuilding.isUnderConstruction)
                     clickedbuilding.ShowBuildingDashboard();
@@ -265,14 +268,37 @@ public class ControlManager : MonoBehaviour
     #region control utilities
     RaycastHit CastRay(LayerMask mask)
     {
-        RaycastHit hit;
-        Vector3 mousePosition = Input.mousePosition;       
-        mousePosition.z = 1.0f;
-        mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
+        //RaycastHit hit;
+        // Vector3 mousePosition = Input.mousePosition;
+        
+        // mousePosition.z = Vector3.Distance(Camera.main.transform.position, Grid.grid.transform.position);
+        // //mousePosition.z = 100.0f;
+        // mousePosition = Camera.main.ScreenToWorldPoint(mousePosition);
+    
+        // Ray ray = new Ray (Camera.main.transform.position, (mousePosition - Camera.main.transform.position));
+        // Physics.Raycast(ray, out hit, maxRayCastDistance, mask);
+        // //print (hit.point);
 
-        Ray ray = new Ray (Camera.main.transform.position, (mousePosition - Camera.main.transform.position));
+        // Debug.DrawLine(Camera.main.transform.position, mousePosition);
+        //return hit;
+        
+        Plane targetPlane = new Plane(Vector3.forward, Grid.grid.transform.position);
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        float distanceOnRay;
+        Vector3 hitLoc = Vector3.zero;
+        if (targetPlane.Raycast(ray, out distanceOnRay))
+        {
+            hitLoc = ray.GetPoint(distanceOnRay);
+        }
+        Debug.DrawLine(Camera.main.transform.position, hitLoc, Color.red);
+        
+        //The original code relies on this function to return a raycast hit, and I'm too lazy to edit, so we'll just redo raycasting with the known point.
+        RaycastHit hit;
+        ray = new Ray (Camera.main.transform.position, (hitLoc - Camera.main.transform.position));
         Physics.Raycast(ray, out hit, maxRayCastDistance, mask);
-        //print (hit.point);
+        Debug.DrawLine(Camera.main.transform.position, hitLoc, Color.white);
+        hit.point = hitLoc; //override the hit point with the correct hitLoc (because normal raycasting is bugged out in Isometric camera).
+                            //This WILL cause issues with object selection (or rather: not fix the existing one), but screw it!
         return hit;
     }
 

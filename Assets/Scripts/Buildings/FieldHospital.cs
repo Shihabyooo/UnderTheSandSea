@@ -10,6 +10,8 @@ public class FieldHospital : Building
         stats.type = BuildingType.fieldHospital;
         effectiveness = GameManager.simMan.simParam.baseFieldHospitalEffectiveness;
         dashboard = GameManager.canvas.transform.Find("BuildingDashboards").Find("GenericManned").gameObject;
+        
+        description = "Field Hospitals fix up your workers so they can proceed to break their backs again hauling all that dirt away.\nHospitals restore health of all workers everyday based on staffing and budget.";
     }
 
     public override float ComputeEffectiveness()
@@ -22,6 +24,8 @@ public class FieldHospital : Building
         {
             effectiveness = GameManager.simMan.simParam.baseFieldHospitalEffectiveness;
             effectiveness = effectiveness * (float)assignedWorkers.Count / (float)stats.capacity;
+            //add budget effect
+            effectiveness = BudgetEffect() * effectiveness;
             //add current effects 
             effectiveness = effectiveness * GameManager.simMan.statEffects.fieldHospitalEffectModifier + GameManager.simMan.statEffects.fieldHospitalEffectBonus;
         }

@@ -26,6 +26,7 @@ public class Building : MonoBehaviour
         buildingCollider = this.gameObject.GetComponent<BoxCollider>();
         assignedWorkers = new List<Worker>();
         effectiveness = 0.0f;
+        budget = (uint)Mathf.RoundToInt(((float)stats.maxBudget + (float)stats.minBudget) / 2.0f);
     }
     
     //building construction methods
@@ -105,6 +106,15 @@ public class Building : MonoBehaviour
         budget = (uint)Mathf.Clamp(newBudget, stats.minBudget, stats.maxBudget);
     }
 
+    protected virtual float BudgetEffect()
+    {
+        //Using a slightly modified Logistic function Y = L/(1+exp(-k(x-x0))) + a
+            // L = Max Value (1.0 here), k = growth rate, x0 = midpoint x, a = modification
+        float budgetRatio = ((float)budget - (float)stats.minBudget)/((float)stats.maxBudget - (float)stats.minBudget);
+        float effect = 1.0f / (1.0f + Mathf.Exp(-5 * (budgetRatio - 0.6f))) + 0.12f;
+
+        return effect;
+    }
     #endregion
 
 }

@@ -106,7 +106,17 @@ public class BuildingsManager : MonoBehaviour
         return tentsWithAvailableBeds[Random.Range(0, tentsWithAvailableBeds.Count - 1)];
     }
 
+    public ulong ComputeBuildingsExpenses()
+    {
+        ulong expenses = 0;
 
+        foreach(Building building in constructedBuildings)
+        {
+            expenses += building.budget;
+        }
+
+        return expenses;
+    }
 
     //=======================================================================================================================
     //=======================================================================================================================

@@ -24,8 +24,12 @@ public class Canteen : Building
         {
             effectiveness = GameManager.simMan.simParam.baseCanteentEffectiveness;
             effectiveness = effectiveness * (float)assignedWorkers.Count / (float)stats.capacity;
+            //add budget effect
+            effectiveness = BudgetEffect() * effectiveness;
             //add current effects 
             effectiveness = effectiveness * GameManager.simMan.statEffects.canteentEffectModifier + GameManager.simMan.statEffects.canteentEffectBonus;
+
+            
 
             //compute traits effect
             effectiveness += GameManager.popMan.ComputeCanteenTraitBonus();

@@ -16,6 +16,8 @@ public class CameraControl : MonoBehaviour
     [SerializeField] float minCameraAngle = 10.0f;
     [SerializeField] float degreesPerTick = 5.0f;
     [SerializeField] CameraBoundary cameraBoundary = new CameraBoundary();
+    [SerializeField] float minOrthoZoom = 1;
+    [SerializeField] float maxOrthoZoom = 5;
 
     public delegate void PostRender();
     public static PostRender postRender;
@@ -33,20 +35,27 @@ public class CameraControl : MonoBehaviour
 
     public void Zoom(float zoomRate)
     {
-        float hitDist = zoomSpeed * Time.deltaTime + 0.5f;
-        Ray ray = new Ray(this.transform.position, this.transform.forward);
-        RaycastHit hit;
-        bool isHit = Physics.Raycast(ray, out hit, hitDist, cameraConstrainingLayers);
+        if (this.gameObject.GetComponent<Camera>().orthographic)
+        {
+            this.gameObject.GetComponent<Camera>().orthographicSize = Mathf.Clamp(this.gameObject.GetComponent<Camera>().orthographicSize - zoomRate, minOrthoZoom, maxOrthoZoom);
+        }
+        else
+        {
+            float hitDist = zoomSpeed * Time.deltaTime + 0.5f;
+            Ray ray = new Ray(this.transform.position, this.transform.forward);
+            RaycastHit hit;
+            bool isHit = Physics.Raycast(ray, out hit, hitDist, cameraConstrainingLayers);
 
-        if (isHit && zoomRate > 0.0f)
-            return;
+            if (isHit && zoomRate > 0.0f)
+                return;
         
-        Vector3 moveDist = zoomRate * this.transform.forward * zoomSpeed * Time.deltaTime;
-        //print (moveDist);
-        this.transform.position += zoomRate * this.transform.forward * zoomSpeed * Time.deltaTime;
+            Vector3 moveDist = zoomRate * this.transform.forward * zoomSpeed * Time.deltaTime;
+            //print (moveDist);
+            this.transform.position += zoomRate * this.transform.forward * zoomSpeed * Time.deltaTime;
 
-        //Clam the position to within the boundaries
-        this.transform.position = cameraBoundary.Clamp(this.transform.position);
+            //Clam the position to within the boundaries
+            this.transform.position = cameraBoundary.Clamp(this.transform.position);
+        }
     }
 
     public void Move(Vector3 direction)
@@ -56,10 +65,12 @@ public class CameraControl : MonoBehaviour
 
     public void Pan(Vector2 direction)
     {
+        //THIS CODE IS STUPID AND DOESN'T WORK! DISREGARD THE CLAIMS BELLOW!
+
         //We pan over the X-Z plane. The problem is that we can't do this relative the the raw state of the object's space, because the rotation about the X-axis (camera tilt)
         //does similarily to our plane, but we do need to maintain the rotation about the Y-axis as well, so we can't use the world space.
         //A stupid hack: rotate set rotation over the X-axis to zero before translating, then reset it again. Stupid, but works...
-
+        
         //Convert the recieved X and Y values to X and Z values (with the new Y being zero).
         Vector3 panDirection = Vector3.zero;
         panDirection.x = direction.x;
@@ -69,7 +80,13 @@ public class CameraControl : MonoBehaviour
         //Backup the rotation.
         Quaternion originalRot = this.transform.rotation;
         //Set rotation about X-axis to zero.
+        //Vector3 forwardPoint = this.transform.position + this.transform.forward * 10.0f;
+        //forwardPoint.z = this.transform.position.z;
+        //this.transform.LookAt(forwardPoint);
+        
+        //Debug.DrawLine (this.transform.position, forwardPoint, Color.green);
         this.transform.eulerAngles = new Vector3(0.0f, this.transform.eulerAngles.y, this.transform.eulerAngles.z); 
+
         //translate (pan) the camera.
         this.transform.Translate(panDirection * cameraSpeed * Time.deltaTime, Space.Self );
         //Clam the position to within the boundaries

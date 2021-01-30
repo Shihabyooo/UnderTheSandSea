@@ -9,14 +9,15 @@ public class Latrine : Building
         base.Awake();
         stats.type = BuildingType.latrine;
         effectiveness = GameManager.simMan.simParam.baseLatrineEffectiveness;
+        dashboard = GameManager.canvas.transform.Find("BuildingDashboards").Find("GenericUnManned").gameObject;
+        description = "What comes in must go out, somehow, and it's better for your crew's sanity that they don't be wading through their own excrement when they're not doing so on hot sand.";
     }
 
     public override float ComputeEffectiveness()
     {
-        //latrines has base effitiveness of 1.0f
-        //Effectiveness increased (or decreased) with worker traits
-        
         effectiveness = GameManager.simMan.simParam.baseLatrineEffectiveness;
+        //add budget effect
+        effectiveness = BudgetEffect() * effectiveness;
         //add current effects 
         effectiveness = effectiveness * GameManager.simMan.statEffects.latrineEffectModifier + GameManager.simMan.statEffects.latrineEffectBonus;
 
@@ -25,5 +26,12 @@ public class Latrine : Building
 
         return effectiveness;
     }
+
+    public override void ShowBuildingDashboard()
+    {
+        dashboard.SetActive(true);
+        dashboard.GetComponent<Dashboard>().Show(this, WorkerType.generic);
+    }
+
 
 }

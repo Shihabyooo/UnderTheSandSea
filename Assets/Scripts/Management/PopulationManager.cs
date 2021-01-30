@@ -104,14 +104,14 @@ public class PopulationManager : MonoBehaviour
     public void UpdateWorkersHealth()
     {
         //first compute field hospital effect
-        float healthGainRate = 0.0f;
+        float healthGain = 0.0f;
         
         if (GameManager.buildMan.fieldHospitals.Count > 0)
         {
             //overall effectiveness => to account for overload (more visitors than facility can handle)
 
             float visitorsPerHospital = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.fieldHospitals.Count;
-            float overallEffectiveness = Mathf.Min(visitorsPerHospital / (float)GameManager.simMan.simParam.fieldHospitalVisitorsThreshold, 1.0f);
+            float overallEffectiveness = Mathf.Min((float)GameManager.simMan.simParam.fieldHospitalVisitorsThreshold / visitorsPerHospital , 1.0f);
             float averageHospitalEffectiveness = 0.0f;
             
             foreach(FieldHospital hospital in GameManager.buildMan.fieldHospitals)
@@ -120,8 +120,16 @@ public class PopulationManager : MonoBehaviour
             }
             averageHospitalEffectiveness = averageHospitalEffectiveness / (float) GameManager.buildMan.fieldHospitals.Count;
 
-            healthGainRate = (float)GameManager.simMan.simParam.baseFieldHospitalHealthRestore * averageHospitalEffectiveness * overallEffectiveness;
+            // print("averageHospitalEffectiveness:" + averageHospitalEffectiveness.ToString());//test
+            // print("overallEffectiveness:" + overallEffectiveness.ToString());//test
+            // print("visitorsPerHospital:" + visitorsPerHospital.ToString());//test
+
+            healthGain = (float)GameManager.simMan.simParam.baseFieldHospitalHealthRestore * averageHospitalEffectiveness * overallEffectiveness;
         }
+        //add some randomness:
+        healthGain = Random.Range(0.85f * healthGain, 1.15f * healthGain);
+
+        //print("Health Gain:" + healthGain.ToString());//test
 
         //then modify workers health
         foreach (Worker worker in population.all)
@@ -132,7 +140,7 @@ public class PopulationManager : MonoBehaviour
             if (worker.food < GameManager.simMan.simParam.malnourishmentThreshold)
                 health = (uint)Mathf.RoundToInt((float) health / 2.0f);
 
-            float healthLossRate = (float)GameManager.simMan.simParam.baseHealthLossRate;
+            float healthLoss = (float)GameManager.simMan.simParam.baseHealthLossRate;
             
             //compute trait effects.
             foreach (WorkerTrait trait in worker.traits)
@@ -140,18 +148,20 @@ public class PopulationManager : MonoBehaviour
                 switch(trait)
                 {
                     case WorkerTrait.coward:
-                        healthLossRate = healthLossRate * 0.7f;
+                        healthLoss = healthLoss * 0.7f;
                         break;
                     case WorkerTrait.athletic:
-                        healthLossRate = healthLossRate * 0.7f;
+                        healthLoss = healthLoss * 0.7f;
                         break;
                     case WorkerTrait.weak:
-                        healthLossRate = healthLossRate * 1.7f;
+                        healthLoss = healthLoss * 1.7f;
                         break;
                 }
             }
+            //add some randomness:
+            healthLoss = Random.Range(0.85f * healthLoss, 1.15f * healthLoss);
 
-            health = (uint)Mathf.Clamp((int)health + Mathf.RoundToInt(healthGainRate - healthLossRate), 0, 100);
+            health = (uint)Mathf.Clamp((int)health + Mathf.RoundToInt(healthGain - healthLoss), 0, 100);
             worker.SetHealth(health);
 
             if (health == 0)
@@ -168,7 +178,7 @@ public class PopulationManager : MonoBehaviour
             //overall effectiveness => to account for overload (more visitors than facility can handle)
 
             float visitorsPerCanteen = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.canteens.Count;
-            float overallEffectiveness = Mathf.Min(visitorsPerCanteen / (float)GameManager.simMan.simParam.fieldHospitalVisitorsThreshold, 1.0f);
+            float overallEffectiveness = Mathf.Min((float)GameManager.simMan.simParam.fieldHospitalVisitorsThreshold / visitorsPerCanteen, 1.0f);
             float averageCanteenEffectiveness = 0.0f;
             
             foreach(FieldHospital hospital in GameManager.buildMan.fieldHospitals)
@@ -179,12 +189,16 @@ public class PopulationManager : MonoBehaviour
 
             foodGain = (float)GameManager.simMan.simParam.baseFieldHospitalHealthRestore * averageCanteenEffectiveness * overallEffectiveness;
         }
+        //add some randomness
+        foodGain = Random.Range(0.85f * foodGain, 1.15f * foodGain);
+
+        //print("Food Gain:" + foodGain.ToString());//test
 
         //then modify workers health
         foreach (Worker worker in population.all)
         {
             uint food = worker.food;
-            float foodLossRate = (float)GameManager.simMan.simParam.baseFoodLossRate;
+            float foodLoss = (float)GameManager.simMan.simParam.baseFoodLossRate;
             
             foreach (WorkerTrait trait in worker.traits)
             {
@@ -194,8 +208,10 @@ public class PopulationManager : MonoBehaviour
                         break;
                 }
             }
+            //add some randomness
+            foodLoss = Random.Range(0.85f * foodLoss, 1.15f * foodLoss);
 
-            food = (uint)Mathf.Clamp((int)food + Mathf.RoundToInt(foodGain - foodLossRate), 0, 100);
+            food = (uint)Mathf.Clamp((int)food + Mathf.RoundToInt(foodGain - foodLoss), 0, 100);
             worker.SetFood(food);
         }
     }
@@ -204,6 +220,7 @@ public class PopulationManager : MonoBehaviour
     {
         float sanityGain = 0.0f;
 
+        //print("Sanity Gain:" + sanityGain.ToString());//test
 
         foreach (Worker worker in population.all)
         {
@@ -239,23 +256,35 @@ public class PopulationManager : MonoBehaviour
 
     public float ComputeLoungeTraitBonus()
     {
-        float bonus = 1.0f;
+        float bonus = 0.0f;
 
         return bonus;
     }
     
     public float ComputeLatrineTraitBonus()
     {
-        float bonus = 1.0f;
+        float bonus = 0.0f;
 
         return bonus;
     }
 
     public float ComputeCanteenTraitBonus()
     {
-        float bonus = 1.0f;
+        float bonus = 0.0f;
 
         return bonus;
+    }
+
+    public ulong ComputeTotalWages()
+    {
+        ulong result = 0;
+
+        foreach (Worker worker in population.all)
+        {
+            result += worker.wage;
+        }
+
+        return result;
     }
 
     //Testing methods

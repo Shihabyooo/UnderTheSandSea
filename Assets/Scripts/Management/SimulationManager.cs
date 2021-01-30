@@ -12,16 +12,19 @@ public class SimulationManager : MonoBehaviour
     public static OnNewDay onNewDay;
 
     public WorkPlan workPlan = new WorkPlan();
-    public Finances fincances = new Finances();
+    public Finances finances = new Finances();
     public SimulationParameters simParam = new SimulationParameters(1);
     public StatusEffects statEffects = new StatusEffects();
 
     public float progress {get; private set;} //discovery progress, percentage.
+    public Vector2Int goalCell = new Vector2Int(); //the cell closes to target. Excavating near it yields better performance. Randomized each game.
 
     public void Initialize()
     {
         currentDate = new System.DateTime(startYear, startMonth, 1);
         progress = 0.0f;
+
+        goalCell = Grid.grid.GetRandomCellID(1,1);
     }
 
     //Day Time
@@ -52,6 +55,9 @@ public class SimulationManager : MonoBehaviour
 
         //process random day events.
 
+        //Update Finances
+        UpdateFinances();
+
         OnWorkDayComponentFinish();
         yield return null;
     }
@@ -66,10 +72,9 @@ public class SimulationManager : MonoBehaviour
         helperCounter = 0;
         workingAnimation = null;
         workingProcess = null;
-        
+
         //finialize things, show results.
         GameManager.uiMan.UpdateProgress((uint)Mathf.FloorToInt(progress));
-
         GameManager.gameMan.FinishWorkDay();
     }
 
@@ -83,9 +88,38 @@ public class SimulationManager : MonoBehaviour
         float rawPerfomance = GameManager.popMan.ExcavationProduction();
 
         //TODO modify rawPerformance based on proximity to actual location of target, and any other factors.
-        effectivePerformance = rawPerfomance;
+        float distanceToTarget = Vector3.Distance(Grid.grid.GetCellPosition((uint)goalCell.x, (uint)goalCell.y),
+                                                    Grid.grid.GetCellPosition((uint)workPlan.excavationAreaCentre.x, (uint)workPlan.excavationAreaCentre.y));
 
+        if (distanceToTarget < workPlan.excavationAreaRadius)
+        {
+            effectivePerformance = rawPerfomance;
+            //print ("Inside Radius"); //test
+        }
+        else
+        {
+            float distanceOutSideRadius = distanceToTarget - workPlan.excavationAreaRadius;
+            float performanceDrop = simParam.performanceDropPerCellWidth * distanceOutSideRadius / (float)Grid.cellSize;
+            effectivePerformance = Mathf.Max(rawPerfomance - performanceDrop, 0.0f);
+            //print ("Outside Radius"); //test
+        }
+        //print ("Effective Perf: " + effectivePerformance); //test
         return (float)effectivePerformance * simParam.performanceModifier;
+    }
+
+    void UpdateFinances()
+    {
+        //revenue
+        ulong revenue = (ulong)Mathf.Round((float)simParam.baseFundsGainRate * statEffects.revenueEffectModifier) + statEffects.revenueEffectBonus;
+        finances.AddFunds(revenue);
+
+
+        //expenses
+        ulong buildingExpenses = GameManager.buildMan.ComputeBuildingsExpenses();
+        ulong wages = GameManager.popMan.ComputeTotalWages();
+
+        finances.SubtractFunds(buildingExpenses + wages);
+        
     }
 
     //Night time
@@ -132,11 +166,6 @@ public class SimulationManager : MonoBehaviour
             onNewDay.Invoke(currentDate);
     }
 
-    void UpdateWorkersStats() //before next day starts
-    {
-        // foreach(Worker worker in GameManager.popMan.)
-    }
-
     //test
     void OnGUI()
     {
@@ -144,6 +173,15 @@ public class SimulationManager : MonoBehaviour
         style.fontSize = 35;
 
         GUI.Label(new Rect(10, 40, 100, 20), "Date: " + currentDate.ToString(), style);
+    }
+
+    void OnDrawGizmos()
+    {
+        if (UnityEditor.EditorApplication.isPlaying)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawSphere(Grid.grid.GetCellPosition((uint)goalCell.x, (uint)goalCell.y), 0.35f);
+        }
     }
 }
 
@@ -198,23 +236,27 @@ public class WorkPlan
 public class Finances
 {
     public long funds {get; private set;}
-
+    public ulong dayExpenses; //solely for caching.
+    public ulong dayRevenue; //solely for caching.
 
     public Finances()
     {
         funds = 1000;
+        ResetDayStatistics();
     }
 
 
-    public void AddFunds(uint revenue)
+    public void AddFunds(ulong revenue)
     {
+        dayRevenue += revenue;
         funds += (int)revenue;
     }
 
-    public void SubtractFunds(uint expense)
+    public void SubtractFunds(ulong expense)
     {
-        funds -= expense;
-        
+        funds -= (long)expense;
+        dayExpenses += expense;
+
         if (funds < 0)
             GameManager.gameMan.HandleBankrupcy();
     }
@@ -224,6 +266,12 @@ public class Finances
         if (expense > funds)
             return false;
         return true;
+    }
+
+    public void ResetDayStatistics()
+    {
+        dayExpenses = 0;
+        dayRevenue = 0;
     }
 }
 
@@ -236,7 +284,10 @@ public class SimulationParameters
     public float disasterSanityLossModifier {get; private set;}
     public float disasterHealthLossModifier {get; private set;}
     public float performanceModifier {get; private set;}
+    public float performanceDropPerCellWidth {get; private set;} //if the excavation was outside the area selected, performance will drop with this value for every cell width distance
+    //public float minExcavationDistanceModifier {get; private set;}  //perfomance drop from distance will not go lower than this value
     public uint malnourishmentThreshold {get; private set;} //if food dropped bellow this, worker basehealth will be halved before other calcs, also affects sanity.
+    
 
     public float baseExcavatorPerformance {get; private set;}
     public uint excavatorsPerArchaelogist {get; private set;}
@@ -272,6 +323,9 @@ public class SimulationParameters
             disasterSanityLossModifier = 0.5f;
             disasterHealthLossModifier = 0.5f;
             performanceModifier = 1.5f;
+            performanceDropPerCellWidth = 0.25f;
+            minExcavationDistanceModifier = 0.35f;
+
             malnourishmentThreshold = 10;
 
             baseExcavatorPerformance = 0.125f;
@@ -286,10 +340,10 @@ public class SimulationParameters
             baseFieldHospitalEffectiveness = 1.0f;
 
             fieldHospitalVisitorsThreshold = 20;
-            baseFieldHospitalHealthRestore = 4;
+            baseFieldHospitalHealthRestore = 7;
 
             canteenVisitorsThreshold = 20;
-            baseCanteenFoodRestore = 5;
+            baseCanteenFoodRestore = 7;
 
             latrineVisitorsThreshold = 20;
             baseLatrineSanityRestore = 2;
@@ -303,6 +357,8 @@ public class SimulationParameters
             disasterSanityLossModifier = 1.0f;
             disasterHealthLossModifier = 1.0f;
             performanceModifier = 1.0f;
+            performanceDropPerCellWidth = 0.45f;
+            minExcavationDistanceModifier = 0.15f;
             malnourishmentThreshold = 15;
 
             baseExcavatorPerformance = 0.1f;
@@ -317,10 +373,10 @@ public class SimulationParameters
             baseFieldHospitalEffectiveness = 1.0f;
 
             fieldHospitalVisitorsThreshold = 20;
-            baseFieldHospitalHealthRestore = 7;
+            baseFieldHospitalHealthRestore = 10;
 
             canteenVisitorsThreshold = 20;
-            baseCanteenFoodRestore = 10;
+            baseCanteenFoodRestore = 15;
 
             latrineVisitorsThreshold = 20;
             baseLatrineSanityRestore = 2;
@@ -334,6 +390,8 @@ public class SimulationParameters
             disasterSanityLossModifier = 1.5f;
             disasterHealthLossModifier = 1.5f;
             performanceModifier = 0.75f;
+            performanceDropPerCellWidth = 0.5f;
+            minExcavationDistanceModifier = 0.0f;
             malnourishmentThreshold = 20;
 
             baseExcavatorPerformance = 0.075f;
@@ -348,7 +406,7 @@ public class SimulationParameters
             baseFieldHospitalEffectiveness = 0.9f;
 
             fieldHospitalVisitorsThreshold = 15;
-            baseFieldHospitalHealthRestore = 7;
+            baseFieldHospitalHealthRestore = 10;
             
             canteenVisitorsThreshold = 15;
             baseCanteenFoodRestore = 15;
@@ -387,4 +445,7 @@ public class StatusEffects //these are changed by events and external factors th
     
     public float geologyLabEffectModifier = 1.0f;
     public float geologyLabEffectBonus = 0.0f;
+
+    public float revenueEffectModifier = 1.0f;
+    public ulong revenueEffectBonus = 0;
 }

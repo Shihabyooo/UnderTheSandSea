@@ -5,22 +5,30 @@ using UnityEngine.UI;
 
 public class RosterSheet : MonoBehaviour
 {
+    static public RosterSheet rosterSheet = null;
+
     Text names;
     Text roles;
     Text health;
     Text sanity;
     Text food;
 
-
     void Awake()
     {
+        if (rosterSheet == null)
+        {
+            rosterSheet = this;
+        }
+        else
+        {
+            Destroy(this.gameObject);
+        }
+
         names = this.transform.Find("Scroll View").Find("Viewport").Find("Content").GetComponent<Text>();
         roles = names.transform.Find("Roles").GetComponent<Text>();
         health = names.transform.Find("Health").GetComponent<Text>();
         sanity = names.transform.Find("Sanity").GetComponent<Text>();
         food = names.transform.Find("Food").GetComponent<Text>();
-
-
         Close();
     }
 

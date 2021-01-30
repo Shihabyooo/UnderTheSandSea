@@ -177,6 +177,18 @@ public class Grid : MonoBehaviour
         }
     }
 
+    public Vector2Int GetRandomCellID(uint paddingX = 0, uint paddingY = 0)
+    {
+        Vector2Int randomID = new Vector2Int();
+
+        int sanitizedPaddingX = (Mathf.Min((int)paddingX, Mathf.FloorToInt((float)gridSize.x / 2.0f) - 1));
+        int sanitizedPaddingY = (Mathf.Min((int)paddingY, Mathf.FloorToInt((float)gridSize.y / 2.0f) - 1));
+
+        randomID.x = Random.Range((int)sanitizedPaddingX, gridSize.x - (int)sanitizedPaddingX);
+        randomID.y = Random.Range((int)sanitizedPaddingY, gridSize.y - (int)sanitizedPaddingY);
+
+        return randomID;
+    }
 }
 
 public class Cell
