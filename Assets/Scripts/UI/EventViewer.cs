@@ -42,8 +42,11 @@ public class EventViewer : MonoBehaviour
         this.gameObject.GetComponent<RawImage>().enabled =true;
 
         //get event image and description
-        if (shownEvent.scenarioImage != null)
-            eventImage.texture = scenarioEvent.scenarioImage;
+        if (scenarioEvent.scenarioImage != null)
+            eventImage.rectTransform.sizeDelta = ComputeViewporteSize(new Vector2Int(scenarioEvent.scenarioImage.width, scenarioEvent.scenarioImage.height));
+        
+        eventImage.texture = scenarioEvent.scenarioImage;
+        
 
         eventText.text = scenarioEvent.scenarioText;
     }
@@ -61,5 +64,17 @@ public class EventViewer : MonoBehaviour
     {
         shownEvent.FinishEvent();
         Hide();
+    }
+
+
+    Vector2Int ComputeViewporteSize(Vector2Int imageSize)
+    {
+        Vector2Int size = new Vector2Int();
+        
+        //height is fixed at whatever was set initially in editor.
+        size.y = (int)eventImage.rectTransform.sizeDelta.y;
+        size.x = Mathf.RoundToInt((float)size.y * (float)imageSize.x / (float)imageSize.y);
+
+        return size;
     }
 }

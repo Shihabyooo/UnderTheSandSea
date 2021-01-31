@@ -49,6 +49,8 @@ public class ScenarioEvent : MonoBehaviour
 
 public class EventsLists
 {
-    static public string[] environmentalEvents = {"SandStorm"};
+    static public string[] environmentalEventsDay = { "Discovery_Fossil"};
+
+    static public string[] environmentalEventsNight = {"SandStorm"};
 
 }

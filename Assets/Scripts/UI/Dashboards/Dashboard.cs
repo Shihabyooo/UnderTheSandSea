@@ -21,12 +21,18 @@ public class Dashboard : MonoBehaviour
             mainWorkerHireButton = this.transform.Find("HireMainWorker").GetComponent<Button>();
             mainWorkerCount = this.transform.Find("MainWorkerCount").GetComponent<Text>();
         }
+        
         if (this.transform.Find("BudgetSlider") != null)
         {
-            budgetText = this.transform.Find("Budget").GetComponent<Text>();
             budgetSlider = this.transform.Find("BudgetSlider").GetComponent<Slider>();
             budgetSlider.onValueChanged.AddListener(OnBudgetSliderChange);
         }
+
+        if (this.transform.Find("Budget") != null)
+            budgetText = this.transform.Find("Budget").GetComponent<Text>();
+
+
+
         effectiveness = this.transform.Find("Effectiveness").GetComponent<Text>();
     }
 
@@ -63,20 +69,22 @@ public class Dashboard : MonoBehaviour
 
     protected virtual void UpdateBudget()
     {
-        if(budgetSlider == null)
-            return;
-        
-        budgetSlider.minValue = building.GetStats().minBudget;
-        budgetSlider.maxValue = building.GetStats().maxBudget;
-        budgetSlider.value = building.budget;
+        if(budgetSlider != null)
+        {
+            budgetSlider.minValue = building.GetStats().minBudget;
+            budgetSlider.maxValue = building.GetStats().maxBudget;
+            budgetSlider.value = building.budget;
+        }
 
-        budgetText.text = "$" + building.budget.ToString();
+        if (budgetText != null)
+            budgetText.text = "$" + building.budget.ToString();
     }
 
     public virtual void OnBudgetSliderChange(float value) //will be assigned to slider in Editor, so we don't need to check that this instance has one.
     {
         building.SetBudget((uint)budgetSlider.value);
         budgetText.text = "$" + building.budget.ToString();
+        UpdateStats();
     }
 
     public void HireMainWorker()

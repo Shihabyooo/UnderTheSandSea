@@ -17,7 +17,7 @@ public class Latrine : Building
     {
         effectiveness = GameManager.simMan.simParam.baseLatrineEffectiveness;
         //add budget effect
-        effectiveness = BudgetEffect() * effectiveness;
+        //effectiveness = BudgetEffect() * effectiveness;
         //add current effects 
         effectiveness = effectiveness * GameManager.simMan.statEffects.latrineEffectModifier + GameManager.simMan.statEffects.latrineEffectBonus;
 

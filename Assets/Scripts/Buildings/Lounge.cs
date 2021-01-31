@@ -17,7 +17,7 @@ public class Lounge : Building
     {
         effectiveness = GameManager.simMan.simParam.baseLoungeEffectiveness;
         //add budget effect
-        effectiveness = BudgetEffect() * effectiveness;
+        //effectiveness = BudgetEffect() * effectiveness;
         //add current effects 
         effectiveness = effectiveness * GameManager.simMan.statEffects.loungeEffectModifier + GameManager.simMan.statEffects.loungEffectBonus;
 

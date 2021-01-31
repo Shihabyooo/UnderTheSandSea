@@ -69,7 +69,7 @@ public class GameManager : MonoBehaviour
 
     public void SwitchToBuildingPlacement(int buildingID)
     {
-        if (controlMan.CurrentCursorMode() != ControlMode.freeMode) 
+        if (controlMan.CurrentCursorMode() != ControlMode.freeMode || currentGameState != GameState.gameplayStage1)
             return;                                                    
 
         controlMan.SwitchToObjectPlacement(buildMan.StartNewBuildingProposal(buildingID));
@@ -148,10 +148,22 @@ public class GameManager : MonoBehaviour
     }
 
     //Win/Lose cases
+    public void HandleWinning()
+    {
+        //This method is callled at WorkProcess(), before dayEvent is processed. So, we simply override whatever event that may have been set with a Winning event,
+        //and let it handle game loss display.
+        print ("Player has won");
+        currentGameState = GameState.endGame;
+
+        GameObject eventHolder = Instantiate(new GameObject("GameOver_Win"), Vector3.zero, new Quaternion(), this.transform);
+        ScenarioEvent newEvent = (ScenarioEvent)eventHolder.AddComponent(typeof(Win));
+        simMan.AddScenarioEvent(newEvent, true);
+    }
+
     public void HandleBankrupcy()
     {
-        //This method is callled at WorkProcess(), before dayEvent is processed. So, we simply override whatever event that may have been set with a Bankrupcy event,
-        //and let it handle game loss display.
+        //Similar rationale to HandleWinning().
+
         print ("Player is bankrupt");
         currentGameState = GameState.endGame;
 

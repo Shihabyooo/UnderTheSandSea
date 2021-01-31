@@ -38,7 +38,10 @@ public class Building : MonoBehaviour
         isUnderConstruction = true;
         Grid.grid.SetCellOccupiedState(cell, true);
         occupiedCell = new uint[2]{cell.cellID[0], cell.cellID[1]};
-        this.transform.localScale = Vector3.zero;
+        this.transform.localScale = new Vector3 (0.25f, 0.25f, 0.25f);
+        // Color baseColour = this.transform.Find("Model").gameObject.GetComponent<MeshRenderer>().material.color;
+        // baseColour.a = 0.25f;
+        // this.transform.Find("Model").gameObject.GetComponent<MeshRenderer>().material.color = baseColour;
         SimulationManager.onNewDay += ProgressConstruction;
     }
 
@@ -47,6 +50,10 @@ public class Building : MonoBehaviour
         constructionDaysElapsed++;
         float ratio = Mathf.Max(Mathf.Min((float)constructionDaysElapsed / (float)stats.constructionDuration , 1.0f), 0.25f);
         this.transform.localScale = new Vector3(ratio, ratio, ratio);
+
+        // Color baseColour = this.transform.Find("Model").gameObject.GetComponent<MeshRenderer>().material.color;
+        // baseColour.a = ratio;
+        // this.transform.Find("Model").gameObject.GetComponent<MeshRenderer>().material.color = baseColour;
 
         if (ratio >= 0.999f)
             OnConstructionComplete(date);

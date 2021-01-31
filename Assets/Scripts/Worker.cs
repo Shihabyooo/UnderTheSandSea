@@ -220,9 +220,9 @@ public class Worker
 
 public struct BaseWages
 {
-    public const uint geologist = 150;
-    public const uint archaeologist = 250;
-    public const uint physician = 150;
-    public const uint cook = 100;
-    public const uint excavator = 50;
+    public const uint geologist = 50;
+    public const uint archaeologist = 100;
+    public const uint physician = 50;
+    public const uint cook = 25;
+    public const uint excavator = 15;
 }

@@ -24,6 +24,8 @@ public class UIManager : MonoBehaviour
         mainMenu = GameManager.canvas.transform.Find("MainMenu").GetComponent<MainMenu>();
         constructionMenu = GameManager.canvas.transform.Find("ConstructionMenu").gameObject;
         generalUI = GameManager.canvas.transform.Find("General").gameObject;
+        
+        mainMenu.gameObject.SetActive(true); //because I'm disabling it on the editor...
     }
 
     public void Initialize()
@@ -197,4 +199,9 @@ public class UIManager : MonoBehaviour
         constructionMenu.SetActive(newState);
     }
 
+    public void UpdateConstructionMenu()
+    {
+        //TODO implement this
+        //loop over transform holding buttons, get component, call UpdateState(funds).
+    }
 }

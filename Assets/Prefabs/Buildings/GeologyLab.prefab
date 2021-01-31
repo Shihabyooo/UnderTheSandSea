@@ -65,8 +65,8 @@ MonoBehaviour:
     type: 3
     constructionDuration: 1
     capacity: 3
-    minBudget: 5
-    maxBudget: 100
+    minBudget: 25
+    maxBudget: 75
 --- !u!1 &1734329152168808631
 GameObject:
   m_ObjectHideFlags: 0

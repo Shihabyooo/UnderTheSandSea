@@ -70,15 +70,18 @@ public class SimulationManager : MonoBehaviour
 
     IEnumerator WorkProcess()
     {
+        //decide random day events. Left first because win-lose events need to override it.
+        DecideOnRandomEnvrionmentalEvent(true);
+
         //process special tasks.
         if (WorkPlan.onWorkStart != null)
             WorkPlan.onWorkStart.Invoke();
 
         //compute performance and update progress
         progress += Performance();
-
-        //process random day events.
-        DecideOnRandomEnvrionmentalEvent(true);
+        
+        if (progress >= 99.99f)
+            GameManager.gameMan.HandleWinning();
 
         //Update Finances
         UpdateFinances();
@@ -208,12 +211,14 @@ public class SimulationManager : MonoBehaviour
 
         float dieRoll = Random.Range(0.0f, 1.0f);
 
-        if (dieRoll < simParam.randomEnvironmentalEventProbability && EventsLists.environmentalEvents.Length > 0)
+        string[] eventsList = isDay? EventsLists.environmentalEventsDay : EventsLists.environmentalEventsNight;
+
+        if (dieRoll < simParam.randomEnvironmentalEventProbability && eventsList.Length > 0)
         {
-            int id = Random.Range(0, EventsLists.environmentalEvents.Length - 1);
+            int id = Random.Range(0, eventsList.Length - 1);
             GameObject eventHolder = Instantiate(new GameObject("event_" +id.ToString()), Vector3.zero, new Quaternion(), this.transform);
             eventHolder.name += isDay? "_day" : "night";
-            ScenarioEvent newEvent = (ScenarioEvent)eventHolder.AddComponent(System.Type.GetType(EventsLists.environmentalEvents[id]));
+            ScenarioEvent newEvent = (ScenarioEvent)eventHolder.AddComponent(System.Type.GetType(eventsList[id]));
             AddScenarioEvent(newEvent, isDay);
         }
     }
@@ -387,7 +392,7 @@ public class Finances
 
     public Finances()
     {
-        funds = 1000;
+        funds = 10000;
         ResetDayStatistics();
     }
 
@@ -465,7 +470,7 @@ public class SimulationParameters
             baseSanityLossRate = 5;
             baseHealthLossRate = 5;
             baseFoodLossRate = 5;
-            baseFundsGainRate = 100;
+            baseFundsGainRate = 750;
             disasterSanityLossModifier = 0.5f;
             disasterHealthLossModifier = 0.5f;
             performanceModifier = 1.5f;
@@ -502,7 +507,7 @@ public class SimulationParameters
             baseSanityLossRate = 10;
             baseHealthLossRate = 10;
             baseFoodLossRate = 10;
-            baseFundsGainRate = 75;
+            baseFundsGainRate = 500;
             disasterSanityLossModifier = 1.0f;
             disasterHealthLossModifier = 1.0f;
             performanceModifier = 1.0f;
@@ -539,7 +544,7 @@ public class SimulationParameters
             baseSanityLossRate = 15;
             baseHealthLossRate = 15;
             baseFoodLossRate = 15;
-            baseFundsGainRate = 50;
+            baseFundsGainRate = 250;
             disasterSanityLossModifier = 1.5f;
             disasterHealthLossModifier = 1.5f;
             performanceModifier = 0.75f;

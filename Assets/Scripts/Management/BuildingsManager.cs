@@ -163,9 +163,10 @@ public class BuildingsManager : MonoBehaviour
             if (!CanConstructHere(cell))
                 return false;
             
+            GameManager.simMan.finances.SubtractFunds(targetBuilding.GetComponent<Building>().GetStats().cost);
             targetBuilding.GetComponent<Building>().BeginConstruction(cell);
             targetBuilding = null;
-                
+            
             return true;
         }
 
@@ -183,7 +184,7 @@ public class BuildingsManager : MonoBehaviour
 
         public void RotatePlan(float direction)
         {
-            targetBuilding.transform.Rotate(0.0f, buildingRotationIncrements * Mathf.Sign(direction), 0.0f);
+            targetBuilding.transform.Rotate(0.0f, 0.0f , buildingRotationIncrements * Mathf.Sign(direction));
         }
     }
 }
