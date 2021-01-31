@@ -8,6 +8,7 @@ public class Dashboard : MonoBehaviour
 
     protected WorkerType mainWorkerType;
     protected Button mainWorkerHireButton = null;
+    protected Button mainWorkerFireButton = null;
     protected Text mainWorkerCount = null;
     protected Building building = null;
     Slider budgetSlider = null;
@@ -19,6 +20,7 @@ public class Dashboard : MonoBehaviour
         if (this.transform.Find("HireMainWorker") != null)
         {
             mainWorkerHireButton = this.transform.Find("HireMainWorker").GetComponent<Button>();
+            mainWorkerFireButton = this.transform.Find("FireMainWorker").GetComponent<Button>();
             mainWorkerCount = this.transform.Find("MainWorkerCount").GetComponent<Text>();
         }
         
@@ -30,8 +32,6 @@ public class Dashboard : MonoBehaviour
 
         if (this.transform.Find("Budget") != null)
             budgetText = this.transform.Find("Budget").GetComponent<Text>();
-
-
 
         effectiveness = this.transform.Find("Effectiveness").GetComponent<Text>();
     }
@@ -57,7 +57,9 @@ public class Dashboard : MonoBehaviour
     protected virtual void UpdateButtons()
     {
         if (mainWorkerHireButton != null)
-            mainWorkerHireButton.enabled = GameManager.popMan.CanHireWorker(mainWorkerType, building);
+            mainWorkerHireButton.interactable = GameManager.popMan.CanHireWorker(mainWorkerType, building);
+        if (mainWorkerFireButton != null)
+            mainWorkerFireButton.interactable = building.assignedWorkers.Count > 0;
     }
 
     protected virtual void UpdateStats()
@@ -90,6 +92,13 @@ public class Dashboard : MonoBehaviour
     public void HireMainWorker()
     {
         GameManager.gameMan.HireWorker(mainWorkerType, building);
+        UpdateButtons();
+        UpdateStats();
+    }
+
+    public void FireMainWorker()
+    {
+        GameManager.gameMan.FireWorker(mainWorkerType, building);
         UpdateButtons();
         UpdateStats();
     }

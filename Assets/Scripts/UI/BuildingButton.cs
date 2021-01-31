@@ -33,7 +33,7 @@ public class BuildingButton : MonoBehaviour
     public void SetButtonLockState(bool lockState) //implies disabling button.
     {
         isLocked = lockState;
-        SetButtonState(false);
+        SetButtonState(!lockState);
     }
 
     void SetButtonState(bool state)

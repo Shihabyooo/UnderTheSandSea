@@ -65,6 +65,9 @@ public class GameManager : MonoBehaviour
 
         currentGameState = GameState.gameplayStage1;
         SimulationManager.onNewDay += FinishNight;
+
+        //Restore HQ lockstate (check HQ.BeginConstruction() for explanation)
+        GameManager.canvas.transform.Find("ConstructionMenu").Find("HQ").GetComponent<BuildingButton>().SetButtonLockState(false);
     }
 
     public void SwitchToBuildingPlacement(int buildingID)
@@ -134,6 +137,18 @@ public class GameManager : MonoBehaviour
                                 sourceBuilding,
                                 buildMan.GetVacantBed(),
                                 simMan.currentDate);
+        }
+    }
+
+    public void FireWorker(WorkerType type, Building sourceBuilding)
+    {
+        if (type == WorkerType.excavator)
+        {
+            popMan.RemoveWorker(popMan.population.excavators[0]);    
+        }
+        else
+        {
+            popMan.RemoveWorker(sourceBuilding.assignedWorkers[0]);
         }
     }
 

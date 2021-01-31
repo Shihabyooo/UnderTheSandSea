@@ -19,6 +19,15 @@ public class HQ : Building
         dashboard.GetComponent<HQ_Dash>().Show(this);
     }
 
+    public override void BeginConstruction(Cell cell)
+    {
+        base.BeginConstruction(cell);
+        //easiest solution to ensure only one HQ per game, we lock the button once we begin constructing the first!
+        //We'll have to remember unlocking it in GameManager.StartNewSimulation().
+        GameManager.canvas.transform.Find("ConstructionMenu").Find("HQ").GetComponent<BuildingButton>().SetButtonLockState(true);
+
+    }
+
     public override float ComputeEffectiveness()
     {
         if (assignedWorkers.Count == 0)

@@ -7,6 +7,7 @@ public class HQ_Dash : Dashboard
 {
     //Button hireArchaelogoistButton;
     Button hireExcavatorButton;
+    Button fireExcavatorButton;
     //Text archaelogistsCount;
     Text excavatorsCount;
 
@@ -20,7 +21,9 @@ public class HQ_Dash : Dashboard
 
         //hireArchaelogoistButton = this.transform.Find("HireArchaelogist").GetComponent<Button>();
         hireExcavatorButton = this.transform.Find("HireExcavator").GetComponent<Button>();
-        
+
+        fireExcavatorButton = this.transform.Find("FireExcavator").GetComponent<Button>();
+
         //archaelogistsCount = this.transform.Find("ArchaelogistsCount").GetComponent<Text>();
         excavatorsCount = this.transform.Find("ExcavatorsCount").GetComponent<Text>();
 
@@ -49,10 +52,9 @@ public class HQ_Dash : Dashboard
 
 
         //check whether we can hire an excavator
-        if (GameManager.popMan.CanHireWorker(WorkerType.excavator, null))
-            hireExcavatorButton.enabled = true;
-        else
-            hireExcavatorButton.enabled = false;
+        hireExcavatorButton.interactable = GameManager.popMan.CanHireWorker(WorkerType.excavator, null);
+
+        fireExcavatorButton.interactable = GameManager.popMan.Count(WorkerType.excavator) > 0;
     }
 
     protected override void UpdateStats()
@@ -66,16 +68,16 @@ public class HQ_Dash : Dashboard
         excavatorsCount.text = currentExcavCount.ToString() + " / " + maxExcavCount.ToString();
     }
 
-    // public void HireArchaelogoist()
-    // {
-    //     GameManager.gameMan.HireWorker(WorkerType.archaeologist, hq);
-    //     UpdateButtons();
-    //     UpdateStats();
-    // }
-
     public void HireExcavator()
     {
         GameManager.gameMan.HireWorker(WorkerType.excavator, building);
+        UpdateButtons();
+        UpdateStats();
+    }
+
+    public void FireExcavator()
+    {
+        GameManager.gameMan.FireWorker(WorkerType.excavator, building);
         UpdateButtons();
         UpdateStats();
     }

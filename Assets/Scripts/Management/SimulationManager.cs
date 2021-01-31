@@ -46,6 +46,8 @@ public class SimulationManager : MonoBehaviour
         nightAnimation = null;
         helperCounter = 0;
         helperCounter2 = 0;
+
+        workPlan.SetExcavationArea(Grid.grid.GetRandomCellID(), ControlManager.minVizFieldRadius);
     }
 
     //Day Time
@@ -326,14 +328,14 @@ public class SimulationManager : MonoBehaviour
         GUI.Label(new Rect(10, 40, 100, 20), "Date: " + currentDate.ToString(), style);
     }
 
-    void OnDrawGizmos()
-    {
-        if (UnityEditor.EditorApplication.isPlaying)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawSphere(Grid.grid.GetCellPosition((uint)goalCell.x, (uint)goalCell.y), 0.35f);
-        }
-    }
+    // void OnDrawGizmos()
+    // {
+    //     if (UnityEditor.EditorApplication.isPlaying)
+    //     {
+    //         Gizmos.color = Color.green;
+    //         Gizmos.DrawSphere(Grid.grid.GetCellPosition((uint)goalCell.x, (uint)goalCell.y), 0.35f);
+    //     }
+    // }
 }
 
 public class WorkPlan
@@ -470,7 +472,7 @@ public class SimulationParameters
             baseSanityLossRate = 5;
             baseHealthLossRate = 5;
             baseFoodLossRate = 5;
-            baseFundsGainRate = 750;
+            baseFundsGainRate = 1000;
             disasterSanityLossModifier = 0.5f;
             disasterHealthLossModifier = 0.5f;
             performanceModifier = 1.5f;
@@ -481,7 +483,7 @@ public class SimulationParameters
 
             baseExcavatorPerformance = 0.125f;
             excavatorsPerArchaelogist = 10;
-            baseExcavationCostPerCell = 25;
+            baseExcavationCostPerCell = 5;
             
             baseHQEffectiveness = 1.0f;
             baseSleepingTentEffectiveness = 1.0f;
@@ -507,7 +509,7 @@ public class SimulationParameters
             baseSanityLossRate = 10;
             baseHealthLossRate = 10;
             baseFoodLossRate = 10;
-            baseFundsGainRate = 500;
+            baseFundsGainRate = 750;
             disasterSanityLossModifier = 1.0f;
             disasterHealthLossModifier = 1.0f;
             performanceModifier = 1.0f;
@@ -517,7 +519,7 @@ public class SimulationParameters
 
             baseExcavatorPerformance = 0.1f;
             excavatorsPerArchaelogist = 10;
-            baseExcavationCostPerCell = 35;
+            baseExcavationCostPerCell = 10;
 
             baseHQEffectiveness = 1.0f;
             baseSleepingTentEffectiveness = 1.0f;
@@ -544,7 +546,7 @@ public class SimulationParameters
             baseSanityLossRate = 15;
             baseHealthLossRate = 15;
             baseFoodLossRate = 15;
-            baseFundsGainRate = 250;
+            baseFundsGainRate = 500;
             disasterSanityLossModifier = 1.5f;
             disasterHealthLossModifier = 1.5f;
             performanceModifier = 0.75f;
@@ -554,7 +556,7 @@ public class SimulationParameters
 
             baseExcavatorPerformance = 0.075f;
             excavatorsPerArchaelogist = 7;
-            baseExcavationCostPerCell = 50;
+            baseExcavationCostPerCell = 20;
 
             baseHQEffectiveness = 0.9f;
             baseSleepingTentEffectiveness = 0.9f;

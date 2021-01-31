@@ -177,7 +177,7 @@ public class ControlManager : MonoBehaviour
 
     GameObject fieldViz = null;
     float vizFieldRadius = 3.0f;
-    float minVizFieldRadius = 2.0f, maxVizFieldRadius = 5.0f;
+    static public float minVizFieldRadius = 2.0f, maxVizFieldRadius = 5.0f;
     [SerializeField] Material fieldMaterial;
     void ExcavationTargetControl()
     {
@@ -373,12 +373,12 @@ public class ControlManager : MonoBehaviour
 
     //Testing Methods
     #region testing methods
-    void OnGUI()
-    {
-        GUIStyle style = new GUIStyle();
-        style.fontSize = 20;
+    // void OnGUI()
+    // {
+    //     GUIStyle style = new GUIStyle();
+    //     style.fontSize = 20;
 
-        GUI.Label(new Rect(10, 20, 100, 20), ("current control mode: " + ((int)currentCursorMode).ToString()), style);
-    }
+    //     GUI.Label(new Rect(10, 20, 100, 20), ("current control mode: " + ((int)currentCursorMode).ToString()), style);
+    // }
     #endregion
 }
