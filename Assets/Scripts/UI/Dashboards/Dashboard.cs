@@ -73,9 +73,13 @@ public class Dashboard : MonoBehaviour
     {
         if(budgetSlider != null)
         {
+            //Changing the values of the slider triggers OnBudgetSliderChange, causing unwanted modifications of budget value in building object, so we remove the listner,
+            //do our changes, then reset the listener.
+            budgetSlider.onValueChanged.RemoveListener(OnBudgetSliderChange);
             budgetSlider.minValue = building.GetStats().minBudget;
             budgetSlider.maxValue = building.GetStats().maxBudget;
             budgetSlider.value = building.budget;
+            budgetSlider.onValueChanged.AddListener(OnBudgetSliderChange);
         }
 
         if (budgetText != null)
@@ -102,7 +106,6 @@ public class Dashboard : MonoBehaviour
         UpdateButtons();
         UpdateStats();
     }
-
 
     public virtual void Close()
     {
