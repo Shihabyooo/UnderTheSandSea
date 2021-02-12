@@ -36,7 +36,7 @@ public class Building : MonoBehaviour
     public virtual void BeginConstruction(Cell cell)
     {
         isUnderConstruction = true;
-        Grid.grid.SetCellOccupiedState(cell, true);
+        Grid.grid.SetNewBuilding(cell, this);
         occupiedCell = new uint[2]{cell.cellID[0], cell.cellID[1]};
         this.transform.localScale = new Vector3 (0.25f, 0.25f, 0.25f);
         // Color baseColour = this.transform.Find("Model").gameObject.GetComponent<MeshRenderer>().material.color;

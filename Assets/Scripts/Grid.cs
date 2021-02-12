@@ -15,7 +15,8 @@ public class Grid : MonoBehaviour
     SpriteRenderer baseGridRenderer;
 
     //Layers
-    GridLayer<int> cellOccupationStatus;
+    //GridLayer<int> cellOccupationStatus; //TODO clean up the code bellow to remove uses of this layer, make occupation tests check whether buildingRefs is null or not.
+    GridLayer<Building> buildingsRefs;
 
     //Methods
     void Awake()
@@ -48,7 +49,8 @@ public class Grid : MonoBehaviour
 
     public void Initialize()
     {
-        cellOccupationStatus = new GridLayer<int>(gridSize);
+        //cellOccupationStatus = new GridLayer<int>(gridSize);
+        buildingsRefs = new GridLayer<Building>(gridSize);
     }
 
     void UpdateGridBoundary()
@@ -71,19 +73,30 @@ public class Grid : MonoBehaviour
 
     }
 
-    public void SetCellOccupiedState (Cell cell, bool isOccupied)
+    // public void SetCellOccupiedState (Cell cell, bool isOccupied)
+    // {
+    //     SetCellOccupiedState(cell.cellID[0], cell.cellID[1], isOccupied? 1 : 0);
+    // }
+
+    // public void SetCellOccupiedState (uint cellID_x, uint cellID_y, bool isOccupied)
+    // {
+    //     SetCellOccupiedState(cellID_x, cellID_y, isOccupied? 1 : 0);
+    // }
+
+    // void SetCellOccupiedState(uint cellID_x, uint cellID_y, int state)
+    // {
+    //     cellOccupationStatus.SetCellValue(cellID_x, cellID_y, state);
+    // }
+
+    public void SetNewBuilding(Cell cell, Building newBuilding)
     {
-        SetCellOccupationState(cell.cellID[0], cell.cellID[1], isOccupied? 1 : 0);
+        buildingsRefs.SetCellValue(cell, newBuilding);
+        //SetCellOccupiedState(cell, true);
     }
 
-    public void SetCellOccupiedState (uint cellID_x, uint cellID_y, bool isOccupied)
+    public void ClearCell(Cell cell)
     {
-        SetCellOccupationState(cellID_x, cellID_y, isOccupied? 1 : 0);
-    }
-
-    void SetCellOccupationState(uint cellID_x, uint cellID_y, int state)
-    {
-        cellOccupationStatus.SetCellValue(cellID_x, cellID_y, state);
+        buildingsRefs.SetCellValue(cell, null);
     }
 
     public Cell SampleForCell(Vector3 position)
@@ -156,25 +169,39 @@ public class Grid : MonoBehaviour
 
     void GetAllCellStates(ref Cell cell)
     {
-        GetCellOccupationState(ref cell);
+        IsCellOccupied(ref cell);
         // GetCellInfrastructureStates(ref cell);
         // GetCellNaturalResourcesStates(ref cell);
         // GetOtherCellStates(ref cell);
     }
 
-    void GetCellOccupationState(ref Cell cell)
+    void IsCellOccupied(ref Cell cell)
     {   
-        switch(cellOccupationStatus.GetCellValue(cell.cellID[0], cell.cellID[1]))
-        {
-            case (0):
-            cell.isOccupied = false;
-                break;
-            case (1):
-            cell.isOccupied = true;
-                break;
-            default:
-                break;
-        }
+        // switch(cellOccupationStatus.GetCellValue(cell.cellID[0], cell.cellID[1]))
+        // {
+        //     case (0):
+        //     cell.isOccupied = false;
+        //         break;
+        //     case (1):
+        //     cell.isOccupied = true;
+        //         break;
+        //     default:
+        //         break;
+        // }
+       cell.isOccupied = (buildingsRefs.GetCellValue(cell) != null);
+    }
+
+    public Building GetOccupyingBuilding(Cell cell)
+    {
+        if (cell == null)
+            return null;
+
+        return buildingsRefs.GetCellValue(cell);
+    }
+
+    public Building GetOccupyingBuilding(Vector3 cellPosition)
+    {
+        return GetOccupyingBuilding(SampleForCell(cellPosition));
     }
 
     public Vector2Int GetRandomCellID(uint paddingX = 0, uint paddingY = 0)
@@ -220,9 +247,19 @@ public class GridLayer<T>
         return grid[cellID_x, cellID_y];
     }
 
-     public ref T GetCellRef(uint cellID_x, uint cellID_y) 
+    public T GetCellValue(Cell cell) //Returns default value of assigned type if index outside array range
     {
+        return GetCellValue(cell.cellID[0], cell.cellID[1]);
+    }
+
+    public ref T GetCellRef(uint cellID_x, uint cellID_y) 
+    {   
         return ref grid[cellID_x, cellID_y];
+    }
+
+    public ref T GetCellRef(Cell cell) 
+    {
+        return ref GetCellRef(cell.cellID[0], cell.cellID[1]);
     }
 
     public void SetCellValue(uint cellID_x, uint cellID_y, T value)
@@ -230,6 +267,11 @@ public class GridLayer<T>
         if (cellID_x >= grid.GetLength(0) || cellID_y >= grid.GetLength(1))
             return;
         grid[cellID_x, cellID_y] = value;
+    }
+
+    public void SetCellValue(Cell cell, T value)
+    {
+        SetCellValue(cell.cellID[0], cell.cellID[1], value);
     }
 
     public Vector2Int GridSize()
