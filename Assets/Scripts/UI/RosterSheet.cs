@@ -2,16 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class RosterSheet : MonoBehaviour
 {
     static public RosterSheet rosterSheet = null;
 
-    Text names;
-    Text roles;
-    Text health;
-    Text sanity;
-    Text food;
+    TextMeshProUGUI names;
+    TextMeshProUGUI roles;
+    TextMeshProUGUI health;
+    TextMeshProUGUI sanity;
+    TextMeshProUGUI food;
 
     void Awake()
     {
@@ -24,11 +25,11 @@ public class RosterSheet : MonoBehaviour
             Destroy(this.gameObject);
         }
 
-        names = this.transform.Find("Scroll View").Find("Viewport").Find("Content").GetComponent<Text>();
-        roles = names.transform.Find("Roles").GetComponent<Text>();
-        health = names.transform.Find("Health").GetComponent<Text>();
-        sanity = names.transform.Find("Sanity").GetComponent<Text>();
-        food = names.transform.Find("Food").GetComponent<Text>();
+        names = this.transform.Find("Scroll View").Find("Viewport").Find("Content").GetComponent<TextMeshProUGUI>();
+        roles = names.transform.Find("Roles").GetComponent<TextMeshProUGUI>();
+        health = names.transform.Find("Health").GetComponent<TextMeshProUGUI>();
+        sanity = names.transform.Find("Sanity").GetComponent<TextMeshProUGUI>();
+        food = names.transform.Find("Food").GetComponent<TextMeshProUGUI>();
         Close();
     }
 
