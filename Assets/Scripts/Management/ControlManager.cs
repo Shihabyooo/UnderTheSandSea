@@ -190,6 +190,7 @@ public class ControlManager : MonoBehaviour
     GameObject fieldViz = null;
     float vizFieldRadius = 3.0f;
     static public float minVizFieldRadius = 2.0f, maxVizFieldRadius = 5.0f;
+    public float vizFieldPerimeterThickness = 0.15f;
     [SerializeField] Material fieldMaterial;
     void ExcavationTargetControl()
     {
@@ -202,7 +203,7 @@ public class ControlManager : MonoBehaviour
         if (cell != null)
         {
             fieldViz.GetComponent<LineRenderer>().enabled = true;
-            fieldViz.transform.position = cell.cellCentre + new Vector3(0.0f, 0.0f, - 0.25f);
+            fieldViz.transform.position = cell.cellCentre + new Vector3(0.0f, 0.0f, - 0.01f);
         }
         else
         {
@@ -370,14 +371,15 @@ public class ControlManager : MonoBehaviour
         fieldViz = new GameObject("FieldViz");
         fieldViz.transform.SetParent(this.transform);
         
+
         LineRenderer renderer = fieldViz.AddComponent<LineRenderer>();
         renderer.useWorldSpace = false;
         renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
         renderer.material = fieldMaterial;
         renderer.loop = true;
-        renderer.startWidth = 0.25f;
-        renderer.endWidth = 0.25f;
-
+        renderer.startWidth = renderer.endWidth = vizFieldPerimeterThickness;
+        renderer.alignment = LineAlignment.TransformZ;
+        renderer.receiveShadows = false;
 
         ReDrawFieldVizCircle();
     }

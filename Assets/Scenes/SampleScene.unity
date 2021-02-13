@@ -2930,7 +2930,7 @@ MonoBehaviour:
   degreesPerTick: 1
   cameraBoundary:
     minCornerXYZ: {x: -7.5, y: -1, z: -7}
-    maxCornerXYZ: {x: 1.5, y: 7.5, z: -2}
+    maxCornerXYZ: {x: 1.5, y: 7.5, z: -6}
   minOrthoZoom: 1
   maxOrthoZoom: 5
 --- !u!20 &519420031
@@ -8732,13 +8732,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1275021234}
-  m_LocalRotation: {x: 0.35917085, y: -0.12492916, z: 0.9129768, w: 0.14785941}
+  m_LocalRotation: {x: -0, y: -0.02994643, z: -0, w: 0.99955153}
   m_LocalPosition: {x: -5.17, y: 4.55, z: -3.614}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 19.532001, y: 41.047, z: 168.97401}
+  m_LocalEulerAnglesHint: {x: 0, y: -3.4320002, z: 0}
 --- !u!1 &1277432127
 GameObject:
   m_ObjectHideFlags: 0
@@ -10394,7 +10394,7 @@ Transform:
   m_GameObject: {fileID: 1434089095}
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 4, y: 1, z: 4}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
@@ -11490,6 +11490,7 @@ MonoBehaviour:
   rightClickHoldTime: 0
   rightClickHoldToPanTime: 0.1
   timeBetweenScrollRotation: 0.05
+  vizFieldPerimeterThickness: 0.15
   fieldMaterial: {fileID: 2100000, guid: 3c93ab87b585efb41b4c3a0b15c6e320, type: 2}
 --- !u!114 &1687595540
 MonoBehaviour:
@@ -11605,7 +11606,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1721991879}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -0.01}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1207574871}
