@@ -65,34 +65,48 @@ public class CameraControl : MonoBehaviour
 
     public void Pan(Vector2 direction)
     {
-        //THIS CODE IS STUPID AND DOESN'T WORK! DISREGARD THE CLAIMS BELLOW!
+        
+        //The commented out lines bellow (including the rant preceeding) are for an older, stupider implementation. Fixed code bellow.
+#region oldImplementation
+        // //THIS CODE IS STUPID AND DOESN'T WORK! DISREGARD THE CLAIMS BELLOW!
 
-        //We pan over the X-Z plane. The problem is that we can't do this relative the the raw state of the object's space, because the rotation about the X-axis (camera tilt)
-        //does similarily to our plane, but we do need to maintain the rotation about the Y-axis as well, so we can't use the world space.
-        //A stupid hack: rotate set rotation over the X-axis to zero before translating, then reset it again. Stupid, but works...
+        // //We pan over the X-Z plane. The problem is that we can't do this relative the the raw state of the object's space, because the rotation about the X-axis (camera tilt)
+        // //does similarily to our plane, but we do need to maintain the rotation about the Y-axis as well, so we can't use the world space.
+        // //A stupid hack: rotate set rotation over the X-axis to zero before translating, then reset it again. Stupid, but works...
         
-        //Convert the recieved X and Y values to X and Z values (with the new Y being zero).
-        Vector3 panDirection = Vector3.zero;
-        panDirection.x = direction.x;
-        //panDirection.z = direction.y;
-        panDirection.y = direction.y;
+        // //Convert the recieved X and Y values to X and Z values (with the new Y being zero).
+        // Vector3 panDirection = Vector3.zero;
+        // panDirection.x = direction.x;
+        // //panDirection.z = direction.y;
+        // panDirection.y = direction.y;
         
-        //Backup the rotation.
-        Quaternion originalRot = this.transform.rotation;
-        //Set rotation about X-axis to zero.
-        //Vector3 forwardPoint = this.transform.position + this.transform.forward * 10.0f;
-        //forwardPoint.z = this.transform.position.z;
-        //this.transform.LookAt(forwardPoint);
+        // //Backup the rotation.
+        // Quaternion originalRot = this.transform.rotation;
+        // //Set rotation about X-axis to zero.
+        // //Vector3 forwardPoint = this.transform.position + this.transform.forward * 10.0f;
+        // //forwardPoint.z = this.transform.position.z;
+        // //this.transform.LookAt(forwardPoint);
         
-        //Debug.DrawLine (this.transform.position, forwardPoint, Color.green);
-        this.transform.eulerAngles = new Vector3(0.0f, this.transform.eulerAngles.y, this.transform.eulerAngles.z); 
+        // //Debug.DrawLine (this.transform.position, forwardPoint, Color.green);
+        // this.transform.eulerAngles = new Vector3(0.0f, this.transform.eulerAngles.y, this.transform.eulerAngles.z); 
 
-        //translate (pan) the camera.
-        this.transform.Translate(panDirection * cameraSpeed * Time.deltaTime, Space.Self );
-        //Clam the position to within the boundaries
-        this.transform.position = cameraBoundary.Clamp(this.transform.position);
-        //rest rotation.
-        this.transform.rotation = originalRot;
+        // //translate (pan) the camera.
+        // this.transform.Translate(panDirection * cameraSpeed * Time.deltaTime, Space.Self );
+        // //Clam the position to within the boundaries
+        // this.transform.position = cameraBoundary.Clamp(this.transform.position);
+        // //rest rotation.
+        // this.transform.rotation = originalRot;
+#endregion
+        
+        //Pepare a camera forward vector that dosn't include the vertical inclination (not starting down).
+        Vector3 adjustedForward = this.transform.forward;
+        adjustedForward.z = 0.0f;
+
+        //Compute the panDisplacement based on adjustedForward vector and raw right vector, using components of direction vector as magnitudes.
+        Vector3 panDisplacement = adjustedForward *  direction.y + this.transform.right * direction.x;
+
+        //shift the camera position based on panDisplacement. All input is carried out in Update(), so we use Time.deltaTime.
+        this.transform.position += panDisplacement * Time.deltaTime * cameraSpeed;
     }
 
     public void RotateView(Vector3 rotation, Vector3 rotationOrigin)
