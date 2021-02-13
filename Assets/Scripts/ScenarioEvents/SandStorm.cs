@@ -13,13 +13,14 @@ public class SandStorm : ScenarioEvent
         base.Awake();
         scenarioImage = Resources.Load<Texture2D>("SandStorm");
 
-        scenarioText = "A sandstorm sweeps through the excavation camp, chipping away at your crew's morale.\nAll workers health -5.\nAll workers sanity -10";
+        scenarioText = "A sandstorm sweeps through the excavation camp, chipping away at your crew's morale.";
+        scenarioEffectText = "All workers' health -5.\nAll workers' sanity -10";
         scenarioName = "Sandstorm"; //test
     }
 
     public override void Play(System.DateTime date)
     {
-        print ("Playing Sandstorm event at" + this.gameObject.name);
+        //print ("Playing Sandstorm event at" + this.gameObject.name);
         SandStormEffect();
 
         base.Play(date);
@@ -33,6 +34,15 @@ public class SandStorm : ScenarioEvent
         GameManager.popMan.GlobalFoodChange(-5);
 
         //FinishEvent();
+    }
+
+    public override bool CheckRequirement() //IMPORTANT! This method is called before the event is initialized.
+    {
+        //Let's have no sandstorms for the first three days.
+        if (GameManager.simMan.DaysSinceStart() < 3)
+            return false;
+            
+        return true;
     }
 
 }

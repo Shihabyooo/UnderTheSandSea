@@ -11,11 +11,13 @@ public class ScenarioEvent : MonoBehaviour
 
     public Texture2D scenarioImage;// {get; protected set;}
     public string scenarioText {get; protected set;}
+    public string scenarioEffectText {get; protected set;}
 
     protected virtual void Awake()
     {
         date = new System.DateTime();
         scenarioText = "[Place holder for scenario text]";
+        scenarioEffectText = "[Place holder for scenario effects]";
         scenarioName = "BaseScenarioEvent"; //test
     }
 
@@ -44,12 +46,17 @@ public class ScenarioEvent : MonoBehaviour
         Destroy(this.gameObject);
     }
 
+    public virtual bool CheckRequirement() //IMPORTANT! This method is called before the event is initialized.
+    {
+        return true;
+    }
+
 }
 
 
 public class EventsLists
 {
-    static public string[] environmentalEventsDay = { "Discovery_Fossil"};
+    static public string[] environmentalEventsDay = {"SandStorm", "Discovery_Fossil" , "Discovery_Remains_Bad"};
 
     static public string[] environmentalEventsNight = {"SandStorm"};
 

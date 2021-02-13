@@ -10,6 +10,7 @@ public class Bankrupcy : ScenarioEvent
         //scenarioImage = Resources.Load<Texture2D>("SandStorm");
 
         scenarioText = "[Placeholder bankrupcy message]";
+        scenarioEffectText = null;
         scenarioName = "Bankrupcy"; //test
     }
 

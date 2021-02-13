@@ -10,6 +10,7 @@ public class Win : ScenarioEvent
         //scenarioImage = Resources.Load<Texture2D>("SandStorm");
 
         scenarioText = "Wait! You can win in this thing????????";
+        scenarioEffectText = null;
         scenarioName = "Winning"; //test
     }
 

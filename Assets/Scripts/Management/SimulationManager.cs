@@ -212,16 +212,28 @@ public class SimulationManager : MonoBehaviour
             return;
 
         float dieRoll = Random.Range(0.0f, 1.0f);
-
+        
         string[] eventsList = isDay? EventsLists.environmentalEventsDay : EventsLists.environmentalEventsNight;
 
         if (dieRoll < simParam.randomEnvironmentalEventProbability && eventsList.Length > 0)
         {
-            int id = Random.Range(0, eventsList.Length - 1);
-            GameObject eventHolder = Instantiate(new GameObject("event_" +id.ToString()), Vector3.zero, new Quaternion(), this.transform);
-            eventHolder.name += isDay? "_day" : "night";
+            int id = Random.Range(0, eventsList.Length);
+
+            //GameObject eventHolder = Instantiate(new GameObject("event_" +id.ToString()), Vector3.zero, new Quaternion(), this.transform);
+            GameObject eventHolder = new GameObject("event_" +id.ToString());
+            eventHolder.transform.position = Vector3.zero;
+            eventHolder.transform.SetParent(this.transform);
+            eventHolder.name += isDay? "_day" : "_night";
             ScenarioEvent newEvent = (ScenarioEvent)eventHolder.AddComponent(System.Type.GetType(eventsList[id]));
-            AddScenarioEvent(newEvent, isDay);
+
+            if (newEvent.CheckRequirement())
+            {
+                AddScenarioEvent(newEvent, isDay);
+            }
+            else
+            {
+                Destroy (eventHolder);
+            }
         }
     }
 
@@ -319,6 +331,17 @@ public class SimulationManager : MonoBehaviour
         yield return null;
     }
 
+
+    //Utility methods
+
+    public int DaysSinceStart()
+    {
+        System.DateTime startDate = new System.DateTime(startYear, startMonth, 1);
+        System.TimeSpan difference = currentDate.Subtract(startDate);
+
+        return difference.Days;
+    }
+
     //testing
     void OnGUI()
     {
@@ -327,15 +350,6 @@ public class SimulationManager : MonoBehaviour
 
         GUI.Label(new Rect(10, 40, 100, 20), "Date: " + currentDate.ToString(), style);
     }
-
-    // void OnDrawGizmos()
-    // {
-    //     if (UnityEditor.EditorApplication.isPlaying)
-    //     {
-    //         Gizmos.color = Color.green;
-    //         Gizmos.DrawSphere(Grid.grid.GetCellPosition((uint)goalCell.x, (uint)goalCell.y), 0.35f);
-    //     }
-    // }
 }
 
 public class WorkPlan
@@ -539,7 +553,7 @@ public class SimulationParameters
             baseLatrineSanityRestore = 2;
 
             randomEnvironmentalEventProbability = 0.10f;
-            //randomEnvironmentalEventProbability = 1.10f; //test
+            randomEnvironmentalEventProbability = 1.10f; //test
         }
         else
         {
