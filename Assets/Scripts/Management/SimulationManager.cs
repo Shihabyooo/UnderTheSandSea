@@ -219,7 +219,6 @@ public class SimulationManager : MonoBehaviour
         {
             int id = Random.Range(0, eventsList.Length);
 
-            //GameObject eventHolder = Instantiate(new GameObject("event_" +id.ToString()), Vector3.zero, new Quaternion(), this.transform);
             GameObject eventHolder = new GameObject("event_" +id.ToString());
             eventHolder.transform.position = Vector3.zero;
             eventHolder.transform.SetParent(this.transform);
@@ -333,7 +332,6 @@ public class SimulationManager : MonoBehaviour
 
 
     //Utility methods
-
     public int DaysSinceStart()
     {
         System.DateTime startDate = new System.DateTime(startYear, startMonth, 1);

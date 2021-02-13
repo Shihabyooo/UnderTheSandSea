@@ -190,7 +190,7 @@ public class Worker
         switch (type)
         {
             case WorkerType.archaeologist:
-                return "Archaelogist";
+                return "Archaeologist";
             case WorkerType.excavator:
                 return "Excavator";
             case WorkerType.geologist:

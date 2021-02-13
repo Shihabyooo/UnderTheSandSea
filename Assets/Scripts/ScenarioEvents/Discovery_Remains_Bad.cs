@@ -39,7 +39,6 @@ public class Discovery_Remains_Bad : ScenarioEvent
         if (GameManager.popMan.Count(WorkerType.excavator) < 1)
             return false;
 
-
         return true;
     }
 }

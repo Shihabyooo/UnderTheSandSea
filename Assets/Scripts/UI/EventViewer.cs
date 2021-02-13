@@ -44,10 +44,6 @@ public class EventViewer : MonoBehaviour
     {
         shownEvent = scenarioEvent;
 
-        // eventImage.gameObject.SetActive(true);
-        // eventText.gameObject.SetActive(true);
-        // eventButton.gameObject.SetActive(true);
-
         foreach (Transform child in this.transform)
         {
             child.gameObject.SetActive(true);
@@ -61,8 +57,6 @@ public class EventViewer : MonoBehaviour
         
         eventImage.texture = scenarioEvent.scenarioImage;
         
-
-        //eventDescription.text = scenarioEvent.scenarioText;
         SetEventDescription();
     }
 
@@ -85,9 +79,6 @@ public class EventViewer : MonoBehaviour
 
     public void Hide()
     {
-        // eventImage.gameObject.SetActive(false);
-        // eventText.gameObject.SetActive(false);
-        // eventButton.gameObject.SetActive(false);
         foreach (Transform child in this.transform)
         {
             child.gameObject.SetActive(false);

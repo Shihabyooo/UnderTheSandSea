@@ -21,9 +21,8 @@ public class Discovery_Fossil : ScenarioEvent
 
     public override void Play(System.DateTime date)
     {
-        //print ("Playing Sandstorm event at" + this.gameObject.name);
         FossilDiscoveryEffect();
-
+        
         base.Play(date);
     }
 
@@ -39,10 +38,8 @@ public class Discovery_Fossil : ScenarioEvent
     public override bool CheckRequirement() //IMPORTANT! This method is called before the event is initialized.
     {
         //can't discover something if we don't have exacavators.
-
         if (GameManager.popMan.Count(WorkerType.excavator) < 1)
             return false;
-
 
         return true;
     }

@@ -9,7 +9,7 @@ public class Bankrupcy : ScenarioEvent
         base.Awake();
         //scenarioImage = Resources.Load<Texture2D>("SandStorm");
 
-        scenarioText = "[Placeholder bankrupcy message]";
+        scenarioText = "Archaeology was a mistake..."; //TODO add a lose message generator
         scenarioEffectText = null;
         scenarioName = "Bankrupcy"; //test
     }

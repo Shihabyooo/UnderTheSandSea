@@ -10,8 +10,6 @@ public class MainMenu : MonoBehaviour
     void Awake()
     {
         newGame = this.transform.Find("StartNewGame").GetComponent<Button>();
-
-        //Hide();
     }
 
     public void Show()

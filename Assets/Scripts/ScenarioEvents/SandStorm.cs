@@ -30,6 +30,7 @@ public class SandStorm : ScenarioEvent
     {
         //Reduce everyone's sanity by 10
         GameManager.popMan.GlobalSanityChange(-10);
+        
         //Reduce everyone's health by 5
         GameManager.popMan.GlobalFoodChange(-5);
 
@@ -41,7 +42,7 @@ public class SandStorm : ScenarioEvent
         //Let's have no sandstorms for the first three days.
         if (GameManager.simMan.DaysSinceStart() < 3)
             return false;
-            
+
         return true;
     }
 
