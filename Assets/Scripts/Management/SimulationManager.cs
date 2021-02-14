@@ -66,6 +66,13 @@ public class SimulationManager : MonoBehaviour
 
     IEnumerator WorkAnimation()
     {
+        GameManager.envMan.StartDay();
+
+        while (GameManager.envMan.isAnimating)
+        {
+            yield return new WaitForFixedUpdate();
+        }
+
         OnWorkDayComponentFinish();
         yield return null;
     }
@@ -170,6 +177,14 @@ public class SimulationManager : MonoBehaviour
 
     IEnumerator NightAnimation()
     {
+        GameManager.envMan.StartNight();
+
+        while (GameManager.envMan.isAnimating)
+        {
+            yield return new WaitForFixedUpdate();
+        }
+
+
         OnNightComponentFinish();
         yield return null;
     }

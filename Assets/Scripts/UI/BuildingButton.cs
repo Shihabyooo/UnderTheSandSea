@@ -30,7 +30,7 @@ public class BuildingButton : MonoBehaviour
 
         SetButtonState(newState);
 
-        print ("BUtton: " + this.gameObject.name + ", states: " + newState.ToString() + CanAfford(funds).ToString() + GameManager.buildMan.CanConstruct(buildingID).ToString() + (!forceLocked).ToString());
+        //print ("BUtton: " + this.gameObject.name + ", states: " + newState.ToString() + CanAfford(funds).ToString() + GameManager.buildMan.CanConstruct(buildingID).ToString() + (!forceLocked).ToString());
     }
 
     public void SetButtonLockState(bool lockState) //implies disabling button.

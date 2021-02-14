@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     static public SimulationManager simMan = null;
     static public PopulationManager popMan = null;
     static public UIManager uiMan = null;
-    EnvironmentManager envMan = null;
+    static public EnvironmentManager envMan = null;
 
     static public GameObject canvas = null;
     static public GameState currentGameState {get; private set;}
