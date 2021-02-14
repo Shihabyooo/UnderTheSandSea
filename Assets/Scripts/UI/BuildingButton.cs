@@ -21,7 +21,6 @@ public class BuildingButton : MonoBehaviour
         GameManager.gameMan.SwitchToBuildingPlacement(buildingID);
     }
 
-
     public void UpdateState(long funds)
     {
         if (isLocked)

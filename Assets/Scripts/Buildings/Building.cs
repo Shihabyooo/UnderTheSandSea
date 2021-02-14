@@ -64,7 +64,7 @@ public class Building : MonoBehaviour
         SimulationManager.onNewDay -= ProgressConstruction;
         isUnderConstruction = false;
         constructionDate = date;
-        GameManager.buildMan.AddBuilding(this);
+        GameManager.buildMan.constructedBuildings.AddBuilding(this);
     }
     #endregion
 

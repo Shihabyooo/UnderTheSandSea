@@ -5,27 +5,30 @@ using UnityEngine;
 public class BuildingsManager : MonoBehaviour
 {
     [SerializeField] BuildingsDatabase database = new BuildingsDatabase();
+    [SerializeField] BuildingLimits buildingLimits = new BuildingLimits();
 
     BuildingProposal currentProposal = null;
-    public List<Building> constructedBuildings {get; private set;}
-    public List<SleepingTent> sleepingTents {get; private set;}
-    public List<FieldHospital> fieldHospitals {get; private set;}
-    public List<Canteen> canteens {get; private set;}
-    public List<GeologyLab> geologyLabs {get; private set;}
-    public List<HQ> hqs {get; private set;}
-    public List<Latrine> latrines {get; private set;}
-    public List<Lounge> lounges {get; private set;}
+    public ConstructedBuildings constructedBuildings {get; private set;}
+    //public List<Building> constructedBuildings {get; private set;}
+    //public List<SleepingTent> sleepingTents {get; private set;}
+    // public List<FieldHospital> fieldHospitals {get; private set;}
+    // public List<Canteen> canteens {get; private set;}
+    // public List<GeologyLab> geologyLabs {get; private set;}
+    // public List<HQ> hqs {get; private set;}
+    // public List<Latrine> latrines {get; private set;}
+    // public List<Lounge> lounges {get; private set;}
 
     public void Initialize()
     {
-        constructedBuildings = new List<Building>();
-        sleepingTents = new List<SleepingTent>();
-        canteens = new List<Canteen>();
-        fieldHospitals = new List<FieldHospital>();
-        geologyLabs = new List<GeologyLab>();
-        hqs = new List<HQ>();
-        latrines = new List<Latrine>();
-        lounges = new List<Lounge>();
+        constructedBuildings = new ConstructedBuildings();
+        // constructedBuildings = new List<Building>();
+        // sleepingTents = new List<SleepingTent>();
+        // canteens = new List<Canteen>();
+        // fieldHospitals = new List<FieldHospital>();
+        // geologyLabs = new List<GeologyLab>();
+        // hqs = new List<HQ>();
+        // latrines = new List<Latrine>();
+        // lounges = new List<Lounge>();
         
         if (currentProposal != null)
             currentProposal.Cancel();
@@ -44,48 +47,20 @@ public class BuildingsManager : MonoBehaviour
         return currentProposal;
     }
 
-    public void AddBuilding(Building newBuilding)
+    public bool CanConstruct (BuildingType buildingType)
     {
-        constructedBuildings.Add(newBuilding);
 
-        switch(newBuilding.GetStats().type)
-        {
-            case BuildingType.sleepTent:
-                sleepingTents.Add(newBuilding.gameObject.GetComponent<SleepingTent>());
-                break;
-            case BuildingType.canteen:
-                canteens.Add(newBuilding.gameObject.GetComponent<Canteen>());
-                break;
-            case BuildingType.fieldHospital:
-                fieldHospitals.Add(newBuilding.gameObject.GetComponent<FieldHospital>());
-                break;
-            case BuildingType.geologyLab:
-                geologyLabs.Add(newBuilding.gameObject.GetComponent<GeologyLab>());
-                break;
-            case BuildingType.hq:
-                hqs.Add(newBuilding.gameObject.GetComponent<HQ>());
-                break;
-            case BuildingType.latrine:
-                latrines.Add(newBuilding.gameObject.GetComponent<Latrine>());
-                break;
-            case BuildingType.lounge:
-                lounges.Add(newBuilding.gameObject.GetComponent<Lounge>());
-                break;
-            default:
-                break;
-        }
-    }
-
-    public bool RemoveBuilding(Building building)
-    {
-        return constructedBuildings.Remove(building);
+        if (constructedBuildings.Count(buildingType) >= buildingLimits.MaxCount(buildingType))
+            return false;
+        
+        return true;
     }
 
     public uint TotalAvailableBeds()
     {
         uint count = 0;
 
-        foreach (SleepingTent tent in sleepingTents)
+        foreach (SleepingTent tent in constructedBuildings.sleepingTents)
         {
             count += tent.AvailableBeds();
         }
@@ -97,7 +72,7 @@ public class BuildingsManager : MonoBehaviour
     {
         List<SleepingTent> tentsWithAvailableBeds = new List<SleepingTent>();
 
-        foreach (SleepingTent tent in sleepingTents)
+        foreach (SleepingTent tent in constructedBuildings.sleepingTents)
         {
             if (tent.AvailableBeds() > 0)
                 tentsWithAvailableBeds.Add(tent);
@@ -111,22 +86,12 @@ public class BuildingsManager : MonoBehaviour
 
     public ulong ComputeBuildingsExpenses()
     {
-        ulong expenses = 0;
-
-        foreach(Building building in constructedBuildings)
-        {
-            expenses += building.budget;
-        }
-
-        return expenses;
+        return constructedBuildings.TotalExpenses();
     }
 
     public void CleanUp()
     {
-        foreach(Building building in constructedBuildings)    
-        {
-            Destroy(building.gameObject);
-        }
+        constructedBuildings.Clear();
     }
 
     //=======================================================================================================================
@@ -189,7 +154,6 @@ public class BuildingsManager : MonoBehaviour
     }
 }
 
-
 [System.Serializable]
 class BuildingsDatabase
 {
@@ -215,6 +179,197 @@ class BuildingsDatabase
         }
 
         return null;
+    }
+
+}
+
+[System.Serializable]
+class BuildingLimits
+{
+    [SerializeField] uint hq = 1;
+    [SerializeField] uint sleepingTent = 5;
+    [SerializeField] uint canteen = 2;
+    [SerializeField] uint fieldHospital = 2;
+    [SerializeField] uint lounge = 2;
+    [SerializeField] uint geologyLab = 1;
+    [SerializeField] uint latrine = 3;
+
+    public uint MaxCount(BuildingType buildingType)
+    {
+        switch(buildingType)
+        {
+            case BuildingType.hq:
+                return hq;
+            case BuildingType.sleepTent:
+                return sleepingTent;
+            case BuildingType.canteen:
+                return canteen;
+            case BuildingType.fieldHospital:
+                return fieldHospital;
+            case BuildingType.lounge:
+                return lounge;
+            case BuildingType.geologyLab:
+                return geologyLab;
+            case BuildingType.latrine:
+                return latrine;
+            default:
+                return 0;
+        }
+    }
+}
+
+
+public class ConstructedBuildings
+{
+    //public List<Building> all {get; private set;}
+    public List<HQ> hqs {get; private set;}
+    public List<SleepingTent> sleepingTents {get; private set;}
+    public List<FieldHospital> fieldHospitals {get; private set;}
+    public List<Canteen> canteens {get; private set;}
+    public List<GeologyLab> geologyLabs {get; private set;}
+    public List<Latrine> latrines {get; private set;}
+    public List<Lounge> lounges {get; private set;}
+
+
+    public ConstructedBuildings()
+    {
+        //all = new List<Building>();
+        hqs = new List<HQ>();
+        sleepingTents = new List<SleepingTent>();
+        canteens = new List<Canteen>();
+        fieldHospitals = new List<FieldHospital>();
+        geologyLabs = new List<GeologyLab>();
+        latrines = new List<Latrine>();
+        lounges = new List<Lounge>();
+    }
+
+
+    public void AddBuilding(Building newBuilding)
+    {
+        switch(newBuilding.GetStats().type)
+        {
+            case BuildingType.sleepTent:
+                sleepingTents.Add(newBuilding.gameObject.GetComponent<SleepingTent>());
+                break;
+            case BuildingType.canteen:
+                canteens.Add(newBuilding.gameObject.GetComponent<Canteen>());
+                break;
+            case BuildingType.fieldHospital:
+                fieldHospitals.Add(newBuilding.gameObject.GetComponent<FieldHospital>());
+                break;
+            case BuildingType.geologyLab:
+                geologyLabs.Add(newBuilding.gameObject.GetComponent<GeologyLab>());
+                break;
+            case BuildingType.hq:
+                hqs.Add(newBuilding.gameObject.GetComponent<HQ>());
+                break;
+            case BuildingType.latrine:
+                latrines.Add(newBuilding.gameObject.GetComponent<Latrine>());
+                break;
+            case BuildingType.lounge:
+                lounges.Add(newBuilding.gameObject.GetComponent<Lounge>());
+                break;
+            default:
+                break;
+        }
+    }
+
+    public bool RemoveBuilding(Building building)
+    {
+        switch(building.GetStats().type)
+        {
+            case BuildingType.sleepTent:
+                return sleepingTents.Remove(building.gameObject.GetComponent<SleepingTent>());
+            case BuildingType.canteen:
+                return canteens.Remove(building.gameObject.GetComponent<Canteen>());
+            case BuildingType.fieldHospital:
+                return fieldHospitals.Remove(building.gameObject.GetComponent<FieldHospital>());
+            case BuildingType.geologyLab:
+                return geologyLabs.Remove(building.gameObject.GetComponent<GeologyLab>());
+            case BuildingType.hq:
+                return hqs.Remove(building.gameObject.GetComponent<HQ>());
+            case BuildingType.latrine:
+                return latrines.Remove(building.gameObject.GetComponent<Latrine>());
+            case BuildingType.lounge:
+                return lounges.Remove(building.gameObject.GetComponent<Lounge>());
+            default:
+                return false;
+        }
+    }
+
+    public uint Count(BuildingType buildingType)
+    {
+         switch(buildingType)
+        {
+            case BuildingType.hq:
+                return (uint)hqs.Count;
+            case BuildingType.sleepTent:
+                return (uint)sleepingTents.Count;
+            case BuildingType.canteen:
+                return (uint)canteens.Count;
+            case BuildingType.fieldHospital:
+                return (uint)fieldHospitals.Count;
+            case BuildingType.geologyLab:
+                return (uint)geologyLabs.Count;
+            case BuildingType.latrine:
+                return (uint)latrines.Count;
+            case BuildingType.lounge:
+                return (uint)lounges.Count;
+            default:
+                return 0;
+        }
+    }
+
+    public ulong TotalExpenses()
+    {
+        ulong expenses = 0;
+
+        foreach(Building building in hqs)
+            expenses += building.budget;
+        
+        foreach(Building building in sleepingTents)
+            expenses += building.budget;
+        
+        foreach(Building building in canteens)
+            expenses += building.budget;
+        
+        foreach(Building building in fieldHospitals)
+            expenses += building.budget;
+        
+        foreach(Building building in geologyLabs)
+            expenses += building.budget;
+        
+        foreach(Building building in latrines)
+            expenses += building.budget;
+        
+        foreach(Building building in lounges)
+            expenses += building.budget;
+
+        return expenses;
+    }
+
+    public void Clear()
+    {
+        foreach(Building building in hqs)
+            MonoBehaviour.Destroy(building.gameObject);
+        
+        foreach(Building building in sleepingTents)
+            MonoBehaviour.Destroy(building.gameObject);
+        
+        foreach(Building building in canteens)
+            MonoBehaviour.Destroy(building.gameObject);
+        
+        foreach(Building building in fieldHospitals)
+            MonoBehaviour.Destroy(building.gameObject);
+        
+        foreach(Building building in geologyLabs)
+            MonoBehaviour.Destroy(building.gameObject);
+        
+        foreach(Building building in latrines)
+            MonoBehaviour.Destroy(building.gameObject);
+        
+        foreach(Building building in lounges)
+            MonoBehaviour.Destroy(building.gameObject);
     }
 
 }

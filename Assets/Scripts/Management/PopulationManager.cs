@@ -102,19 +102,19 @@ public class PopulationManager : MonoBehaviour
         //first compute field hospital effect
         float healthGain = 0.0f;
         
-        if (GameManager.buildMan.fieldHospitals.Count > 0)
+        if (GameManager.buildMan.constructedBuildings.fieldHospitals.Count > 0)
         {
             //overall effectiveness => to account for overload (more visitors than facility can handle)
 
-            float visitorsPerHospital = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.fieldHospitals.Count;
+            float visitorsPerHospital = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.constructedBuildings.fieldHospitals.Count;
             float overallEffectiveness = Mathf.Min((float)GameManager.simMan.simParam.fieldHospitalVisitorsThreshold / visitorsPerHospital , 1.0f);
             float averageHospitalEffectiveness = 0.0f;
             
-            foreach(FieldHospital hospital in GameManager.buildMan.fieldHospitals)
+            foreach(FieldHospital hospital in GameManager.buildMan.constructedBuildings.fieldHospitals)
             {
                 averageHospitalEffectiveness += hospital.ComputeEffectiveness();
             }
-            averageHospitalEffectiveness = averageHospitalEffectiveness / (float) GameManager.buildMan.fieldHospitals.Count;
+            averageHospitalEffectiveness = averageHospitalEffectiveness / (float) GameManager.buildMan.constructedBuildings.fieldHospitals.Count;
 
             // print("averageHospitalEffectiveness:" + averageHospitalEffectiveness.ToString());//test
             // print("overallEffectiveness:" + overallEffectiveness.ToString());//test
@@ -169,21 +169,21 @@ public class PopulationManager : MonoBehaviour
     {
         float foodGain = 0.0f;
 
-        if (GameManager.buildMan.canteens.Count > 0)
+        if (GameManager.buildMan.constructedBuildings.canteens.Count > 0)
         {
             //overall effectiveness => to account for overload (more visitors than facility can handle)
 
-            float visitorsPerCanteen = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.canteens.Count;
-            float overallEffectiveness = Mathf.Min((float)GameManager.simMan.simParam.fieldHospitalVisitorsThreshold / visitorsPerCanteen, 1.0f);
+            float visitorsPerCanteen = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.constructedBuildings.canteens.Count;
+            float overallEffectiveness = Mathf.Min((float)GameManager.simMan.simParam.canteenVisitorsThreshold / visitorsPerCanteen, 1.0f);
             float averageCanteenEffectiveness = 0.0f;
             
-            foreach(FieldHospital hospital in GameManager.buildMan.fieldHospitals)
+            foreach(Canteen canteen in GameManager.buildMan.constructedBuildings.canteens)
             {
-                averageCanteenEffectiveness += hospital.ComputeEffectiveness();
+                averageCanteenEffectiveness += canteen.ComputeEffectiveness();
             }
-            averageCanteenEffectiveness = averageCanteenEffectiveness / (float) GameManager.buildMan.fieldHospitals.Count;
+            averageCanteenEffectiveness = averageCanteenEffectiveness / (float) GameManager.buildMan.constructedBuildings.canteens.Count;
 
-            foodGain = (float)GameManager.simMan.simParam.baseFieldHospitalHealthRestore * averageCanteenEffectiveness * overallEffectiveness;
+            foodGain = (float)GameManager.simMan.simParam.baseCanteenFoodRestore * averageCanteenEffectiveness * overallEffectiveness;
         }
         //add some randomness
         foodGain = Random.Range(0.85f * foodGain, 1.15f * foodGain);
