@@ -27,6 +27,7 @@ public class GameManager : MonoBehaviour
     static public SimulationManager simMan = null;
     static public PopulationManager popMan = null;
     static public UIManager uiMan = null;
+    EnvironmentManager envMan = null;
 
     static public GameObject canvas = null;
     static public GameState currentGameState {get; private set;}
@@ -41,6 +42,7 @@ public class GameManager : MonoBehaviour
             simMan = this.gameObject.GetComponent<SimulationManager>();
             popMan = this.gameObject.GetComponent<PopulationManager>();
             uiMan = this.gameObject.GetComponent<UIManager>();
+            envMan = this.gameObject.GetComponent<EnvironmentManager>();
 
             canvas = GameObject.Find("Canvas");
         }
@@ -62,6 +64,7 @@ public class GameManager : MonoBehaviour
         buildMan.Initialize();
         uiMan.Initialize();
         Grid.grid.Initialize();
+        envMan.Initialize();
 
         currentGameState = GameState.gameplayStage1;
         SimulationManager.onNewDay += FinishNight;
