@@ -102,19 +102,20 @@ public class PopulationManager : MonoBehaviour
         //first compute field hospital effect
         float healthGain = 0.0f;
         
-        if (GameManager.buildMan.constructedBuildings.fieldHospitals.Count > 0)
+        if (GameManager.buildMan.constructedBuildings.CountActive(BuildingType.fieldHospital) > 0)
         {
             //overall effectiveness => to account for overload (more visitors than facility can handle)
 
-            float visitorsPerHospital = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.constructedBuildings.fieldHospitals.Count;
+            float visitorsPerHospital = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.constructedBuildings.CountActive(BuildingType.fieldHospital);
             float overallEffectiveness = Mathf.Min((float)GameManager.simMan.simParam.fieldHospitalVisitorsThreshold / visitorsPerHospital , 1.0f);
             float averageHospitalEffectiveness = 0.0f;
             
             foreach(FieldHospital hospital in GameManager.buildMan.constructedBuildings.fieldHospitals)
             {
-                averageHospitalEffectiveness += hospital.ComputeEffectiveness();
+                if (!hospital.isUnderConstruction)
+                    averageHospitalEffectiveness += hospital.ComputeEffectiveness();
             }
-            averageHospitalEffectiveness = averageHospitalEffectiveness / (float) GameManager.buildMan.constructedBuildings.fieldHospitals.Count;
+            averageHospitalEffectiveness = averageHospitalEffectiveness / (float) GameManager.buildMan.constructedBuildings.CountActive(BuildingType.fieldHospital);
 
             // print("averageHospitalEffectiveness:" + averageHospitalEffectiveness.ToString());//test
             // print("overallEffectiveness:" + overallEffectiveness.ToString());//test
@@ -169,19 +170,20 @@ public class PopulationManager : MonoBehaviour
     {
         float foodGain = 0.0f;
 
-        if (GameManager.buildMan.constructedBuildings.canteens.Count > 0)
+        if (GameManager.buildMan.constructedBuildings.CountActive(BuildingType.canteen) > 0)
         {
             //overall effectiveness => to account for overload (more visitors than facility can handle)
 
-            float visitorsPerCanteen = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.constructedBuildings.canteens.Count;
+            float visitorsPerCanteen = (float)GameManager.popMan.CountAll() / (float)GameManager.buildMan.constructedBuildings.CountActive(BuildingType.canteen);
             float overallEffectiveness = Mathf.Min((float)GameManager.simMan.simParam.canteenVisitorsThreshold / visitorsPerCanteen, 1.0f);
             float averageCanteenEffectiveness = 0.0f;
             
             foreach(Canteen canteen in GameManager.buildMan.constructedBuildings.canteens)
             {
-                averageCanteenEffectiveness += canteen.ComputeEffectiveness();
+                if (!canteen.isUnderConstruction)
+                    averageCanteenEffectiveness += canteen.ComputeEffectiveness();
             }
-            averageCanteenEffectiveness = averageCanteenEffectiveness / (float) GameManager.buildMan.constructedBuildings.canteens.Count;
+            averageCanteenEffectiveness = averageCanteenEffectiveness / (float) GameManager.buildMan.constructedBuildings.CountActive(BuildingType.canteen);
 
             foodGain = (float)GameManager.simMan.simParam.baseCanteenFoodRestore * averageCanteenEffectiveness * overallEffectiveness;
         }

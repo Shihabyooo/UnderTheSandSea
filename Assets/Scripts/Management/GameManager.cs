@@ -65,9 +65,6 @@ public class GameManager : MonoBehaviour
 
         currentGameState = GameState.gameplayStage1;
         SimulationManager.onNewDay += FinishNight;
-
-        //Restore HQ lockstate (check HQ.BeginConstruction() for explanation)
-        GameManager.canvas.transform.Find("ConstructionMenu").Find("HQ").GetComponent<BuildingButton>().SetButtonLockState(false);
     }
 
     public void SwitchToBuildingPlacement(int buildingID)
@@ -92,7 +89,6 @@ public class GameManager : MonoBehaviour
             RosterSheet.rosterSheet.Close();
         
         uiMan.SwitchDashboard(null);
-
         uiMan.ToggleControls(false);
 
 

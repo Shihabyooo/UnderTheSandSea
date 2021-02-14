@@ -9,26 +9,10 @@ public class BuildingsManager : MonoBehaviour
 
     BuildingProposal currentProposal = null;
     public ConstructedBuildings constructedBuildings {get; private set;}
-    //public List<Building> constructedBuildings {get; private set;}
-    //public List<SleepingTent> sleepingTents {get; private set;}
-    // public List<FieldHospital> fieldHospitals {get; private set;}
-    // public List<Canteen> canteens {get; private set;}
-    // public List<GeologyLab> geologyLabs {get; private set;}
-    // public List<HQ> hqs {get; private set;}
-    // public List<Latrine> latrines {get; private set;}
-    // public List<Lounge> lounges {get; private set;}
 
     public void Initialize()
     {
         constructedBuildings = new ConstructedBuildings();
-        // constructedBuildings = new List<Building>();
-        // sleepingTents = new List<SleepingTent>();
-        // canteens = new List<Canteen>();
-        // fieldHospitals = new List<FieldHospital>();
-        // geologyLabs = new List<GeologyLab>();
-        // hqs = new List<HQ>();
-        // latrines = new List<Latrine>();
-        // lounges = new List<Lounge>();
         
         if (currentProposal != null)
             currentProposal.Cancel();
@@ -56,6 +40,11 @@ public class BuildingsManager : MonoBehaviour
         return true;
     }
 
+    public bool CanConstruct (int buildingID) //for ease of use with BuildingButton
+    {
+        return CanConstruct(GetBuildingStats(buildingID).type);
+    }
+
     public uint TotalAvailableBeds()
     {
         uint count = 0;
@@ -74,7 +63,7 @@ public class BuildingsManager : MonoBehaviour
 
         foreach (SleepingTent tent in constructedBuildings.sleepingTents)
         {
-            if (tent.AvailableBeds() > 0)
+            if (!tent.isUnderConstruction && tent.AvailableBeds() > 0)
                 tentsWithAvailableBeds.Add(tent);
         }
 
@@ -130,6 +119,7 @@ public class BuildingsManager : MonoBehaviour
             
             GameManager.simMan.finances.SubtractFunds(targetBuilding.GetComponent<Building>().GetStats().cost);
             targetBuilding.GetComponent<Building>().BeginConstruction(cell);
+            GameManager.uiMan.UpdateConstructionButtons();
             targetBuilding = null;
             
             return true;
@@ -218,10 +208,9 @@ class BuildingLimits
     }
 }
 
-
 public class ConstructedBuildings
 {
-    //public List<Building> all {get; private set;}
+    public List<Building> all {get; private set;}
     public List<HQ> hqs {get; private set;}
     public List<SleepingTent> sleepingTents {get; private set;}
     public List<FieldHospital> fieldHospitals {get; private set;}
@@ -233,7 +222,7 @@ public class ConstructedBuildings
 
     public ConstructedBuildings()
     {
-        //all = new List<Building>();
+        all = new List<Building>();
         hqs = new List<HQ>();
         sleepingTents = new List<SleepingTent>();
         canteens = new List<Canteen>();
@@ -246,6 +235,9 @@ public class ConstructedBuildings
 
     public void AddBuilding(Building newBuilding)
     {
+
+        all.Add(newBuilding);
+
         switch(newBuilding.GetStats().type)
         {
             case BuildingType.sleepTent:
@@ -276,6 +268,7 @@ public class ConstructedBuildings
 
     public bool RemoveBuilding(Building building)
     {
+        all.Remove(building);
         switch(building.GetStats().type)
         {
             case BuildingType.sleepTent:
@@ -320,56 +313,93 @@ public class ConstructedBuildings
         }
     }
 
+    public uint CountActive(BuildingType buildingType) //returns count of buildings that have finished construction
+    {
+        uint count = 0;
+         switch(buildingType)
+        {
+            case BuildingType.hq:
+                foreach(Building building in hqs)
+                {
+                    if (!building.isUnderConstruction)
+                        count++;
+                }
+                break;
+            case BuildingType.sleepTent:
+                foreach(Building building in sleepingTents)
+                {
+                    if (!building.isUnderConstruction)
+                        count++;
+                }
+                break;
+            case BuildingType.canteen:
+                foreach(Building building in canteens)
+                {
+                    if (!building.isUnderConstruction)
+                        count++;
+                }
+                break;
+            case BuildingType.fieldHospital:
+                foreach(Building building in fieldHospitals)
+                {
+                    if (!building.isUnderConstruction)
+                        count++;
+                }
+                break;
+            case BuildingType.geologyLab:
+                foreach(Building building in geologyLabs)
+                {
+                    if (!building.isUnderConstruction)
+                        count++;
+                }
+                break;
+            case BuildingType.latrine:
+                foreach(Building building in latrines)
+                {
+                    if (!building.isUnderConstruction)
+                        count++;
+                }
+                break;
+            case BuildingType.lounge:
+                foreach(Building building in lounges)
+                {
+                    if (!building.isUnderConstruction)
+                        count++;
+                }
+                break;
+            default:
+                break;
+        }
+
+        return count;
+    }
+
     public ulong TotalExpenses()
     {
         ulong expenses = 0;
 
-        foreach(Building building in hqs)
-            expenses += building.budget;
-        
-        foreach(Building building in sleepingTents)
-            expenses += building.budget;
-        
-        foreach(Building building in canteens)
-            expenses += building.budget;
-        
-        foreach(Building building in fieldHospitals)
-            expenses += building.budget;
-        
-        foreach(Building building in geologyLabs)
-            expenses += building.budget;
-        
-        foreach(Building building in latrines)
-            expenses += building.budget;
-        
-        foreach(Building building in lounges)
-            expenses += building.budget;
+        foreach(Building building in all)
+        {
+            if (!building.isUnderConstruction)
+                expenses += building.budget;
+        }
 
         return expenses;
     }
 
     public void Clear()
     {
-        foreach(Building building in hqs)
+        foreach(Building building in all)
             MonoBehaviour.Destroy(building.gameObject);
         
-        foreach(Building building in sleepingTents)
-            MonoBehaviour.Destroy(building.gameObject);
-        
-        foreach(Building building in canteens)
-            MonoBehaviour.Destroy(building.gameObject);
-        
-        foreach(Building building in fieldHospitals)
-            MonoBehaviour.Destroy(building.gameObject);
-        
-        foreach(Building building in geologyLabs)
-            MonoBehaviour.Destroy(building.gameObject);
-        
-        foreach(Building building in latrines)
-            MonoBehaviour.Destroy(building.gameObject);
-        
-        foreach(Building building in lounges)
-            MonoBehaviour.Destroy(building.gameObject);
+        all.Clear();
+        hqs.Clear();
+        sleepingTents.Clear();
+        canteens.Clear();
+        fieldHospitals.Clear();
+        geologyLabs.Clear();
+        latrines.Clear();
+        lounges.Clear();
     }
 
 }

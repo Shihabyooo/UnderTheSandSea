@@ -197,11 +197,15 @@ public class UIManager : MonoBehaviour
     {
         generalUI.SetActive(newState);
         constructionMenu.SetActive(newState);
+        UpdateConstructionButtons();
     }
 
-    public void UpdateConstructionMenu()
+    public void UpdateConstructionButtons()
     {
-        //TODO implement this
-        //loop over transform holding buttons, get component, call UpdateState(funds).
+        foreach(Transform button in constructionMenu.transform)
+        {
+            button.GetComponent<BuildingButton>().UpdateState(GameManager.simMan.finances.funds);
+        }
     }
+
 }

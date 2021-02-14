@@ -33,9 +33,11 @@ public class Building : MonoBehaviour
     #region construction
     public bool isUnderConstruction {get; private set;}
     uint constructionDaysElapsed = 0;
+    
     public virtual void BeginConstruction(Cell cell)
     {
         isUnderConstruction = true;
+        GameManager.buildMan.constructedBuildings.AddBuilding(this);
         Grid.grid.SetNewBuilding(cell, this);
         occupiedCell = new uint[2]{cell.cellID[0], cell.cellID[1]};
         this.transform.localScale = new Vector3 (0.25f, 0.25f, 0.25f);
@@ -64,7 +66,6 @@ public class Building : MonoBehaviour
         SimulationManager.onNewDay -= ProgressConstruction;
         isUnderConstruction = false;
         constructionDate = date;
-        GameManager.buildMan.constructedBuildings.AddBuilding(this);
     }
     #endregion
 

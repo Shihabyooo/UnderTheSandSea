@@ -24,7 +24,7 @@ public class HQ : Building
         base.BeginConstruction(cell);
         //easiest solution to ensure only one HQ per game, we lock the button once we begin constructing the first!
         //We'll have to remember unlocking it in GameManager.StartNewSimulation().
-        GameManager.canvas.transform.Find("ConstructionMenu").Find("HQ").GetComponent<BuildingButton>().SetButtonLockState(true);
+        //GameManager.canvas.transform.Find("ConstructionMenu").Find("HQ").GetComponent<BuildingButton>().SetButtonLockState(true);
 
     }
 

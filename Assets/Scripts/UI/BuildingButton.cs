@@ -7,7 +7,8 @@ public class BuildingButton : MonoBehaviour
 {
     [SerializeField] int buildingID;
     Button button;
-    bool isLocked = false;
+    //bool isLocked = false;
+    public bool forceLocked = false; //for manual locking.
 
     void Awake()
     {
@@ -23,15 +24,18 @@ public class BuildingButton : MonoBehaviour
 
     public void UpdateState(long funds)
     {
-        if (isLocked)
-            return;
+        bool newState = CanAfford(funds)
+                        && GameManager.buildMan.CanConstruct(buildingID)
+                        && !forceLocked;
 
-        SetButtonState(CanAfford(funds));
+        SetButtonState(newState);
+
+        print ("BUtton: " + this.gameObject.name + ", states: " + newState.ToString() + CanAfford(funds).ToString() + GameManager.buildMan.CanConstruct(buildingID).ToString() + (!forceLocked).ToString());
     }
 
     public void SetButtonLockState(bool lockState) //implies disabling button.
     {
-        isLocked = lockState;
+        //isLocked = lockState;
         SetButtonState(!lockState);
     }
 
